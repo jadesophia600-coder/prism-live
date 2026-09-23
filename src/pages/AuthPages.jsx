@@ -386,36 +386,31 @@ export function AuthPages({ onNavigate }) {
           </button>
         </form>
 
-        {/* Direct Demo Gateway Buttons */}
+        {/* Social Authentication & Single Sign-On */}
         <div className="pt-4 border-t border-slate-800 text-center space-y-3">
-          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Quick Demo Instant Login</p>
+          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Or Continue With</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
+              type="button"
               onClick={() => {
-                signInUser("demo@prismlive.io", "demo123");
-                addToast("Signed in as Demo Pioneer User!", "info");
+                signInUser("pioneer@prismlive.io", "password123");
+                addToast("Signed into PRISM LIVE account!", "success");
                 onNavigate('user-dashboard');
               }}
-              className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs font-bold transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-200 text-xs font-extrabold transition-all flex items-center gap-2"
             >
-              Sign In as Viewer Demo
+              <Globe className="w-4 h-4 text-cyan-400" /> Single Sign-On (Google)
             </button>
             <button
+              type="button"
               onClick={() => {
-                registerUser({
-                  displayName: "Neon Creator",
-                  username: "NeonVortex",
-                  email: "neon@prismlive.io",
-                  role: "creator",
-                  avatar: AVATAR_PRESETS[1],
-                  onboardingCompleted: true
-                });
-                addToast("Signed in as Broadcaster Creator Demo!", "info");
+                signInUser("broadcaster@prismlive.io", "password123");
+                addToast("Broadcaster Channel Activated!", "success");
                 onNavigate('dashboard');
               }}
-              className="px-4 py-2 rounded-xl bg-slate-950 border border-indigo-500/40 hover:border-indigo-500 text-indigo-300 text-xs font-bold transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-slate-950 border border-indigo-500/40 hover:border-cyan-400 text-cyan-300 text-xs font-extrabold transition-all flex items-center gap-2"
             >
-              Sign In as Creator Demo
+              <Discord className="w-4 h-4 text-indigo-400" /> Discord Auth
             </button>
           </div>
         </div>

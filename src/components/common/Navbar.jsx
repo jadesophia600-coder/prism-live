@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
-  const { user, switchRole, notifications, markNotificationAsRead } = useAuth();
+  const { user, switchRole, notifications, markNotificationAsRead, signOutUser } = useAuth();
   const { addToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -254,7 +254,9 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
                   <button
                     onClick={() => {
                       setShowUserMenu(false);
-                      addToast("Signed out of demo session", "info");
+                      signOutUser();
+                      addToast("Signed out of PRISM LIVE", "info");
+                      onNavigate('auth');
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                   >
