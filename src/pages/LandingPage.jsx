@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 export function LandingPage({ onNavigate, onSelectStream }) {
-  const featuredStream = LIVE_STREAMS[0];
+  const featuredStream = (LIVE_STREAMS && LIVE_STREAMS.length > 0) ? LIVE_STREAMS[0] : null;
   const [estMonthlyViewers, setEstMonthlyViewers] = useState(25000);
 
   // Creator Revenue Calculator Formula: (Viewers * $0.45) + (Subs * $4.25)
@@ -79,38 +79,40 @@ export function LandingPage({ onNavigate, onSelectStream }) {
           </div>
 
           {/* Right Hero Live Stream Preview Card */}
-          <div className="lg:col-span-6 z-10">
-            <div className="relative rounded-3xl glass-panel bg-slate-900/80 border border-slate-800 p-2 shadow-2xl overflow-hidden group">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950">
-                <img src={featuredStream.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-                
-                {/* Live Badge */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-600/90 text-white font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-lg badge-live-pulse">
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-                  FEATURED LIVE
-                </div>
-
-                {/* Play Button Overlay */}
-                <button
-                  onClick={() => onSelectStream(featuredStream)}
-                  className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-indigo-600/90 text-white flex items-center justify-center shadow-2xl backdrop-blur-md hover:scale-110 transition-transform group-hover:bg-indigo-500"
-                >
-                  <Play className="w-8 h-8 fill-white ml-1" />
-                </button>
-
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-extrabold text-white line-clamp-1">{featuredStream.title}</h3>
-                    <p className="text-xs text-cyan-300 font-semibold">{featuredStream.creator.displayName}</p>
+          {featuredStream && (
+            <div className="lg:col-span-6 z-10">
+              <div className="relative rounded-3xl glass-panel bg-slate-900/80 border border-slate-800 p-2 shadow-2xl overflow-hidden group">
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950">
+                  <img src={featuredStream.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                  
+                  {/* Live Badge */}
+                  <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-600/90 text-white font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-lg badge-live-pulse">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                    FEATURED LIVE
                   </div>
-                  <span className="px-3 py-1 rounded-lg bg-slate-950/80 text-white font-mono font-bold text-xs border border-slate-800">
-                    {(featuredStream.viewerCount / 1000).toFixed(1)}k Viewers
-                  </span>
+
+                  {/* Play Button Overlay */}
+                  <button
+                    onClick={() => onSelectStream(featuredStream)}
+                    className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-indigo-600/90 text-white flex items-center justify-center shadow-2xl backdrop-blur-md hover:scale-110 transition-transform group-hover:bg-indigo-500"
+                  >
+                    <Play className="w-8 h-8 fill-white ml-1" />
+                  </button>
+
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-white line-clamp-1">{featuredStream.title}</h3>
+                      <p className="text-xs text-cyan-300 font-semibold">{featuredStream.creator?.displayName}</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-lg bg-slate-950/80 text-white font-mono font-bold text-xs border border-slate-800">
+                      {featuredStream.viewerCount ? (featuredStream.viewerCount / 1000).toFixed(1) : 0}k Viewers
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
         </div>
       </section>
@@ -134,13 +136,13 @@ export function LandingPage({ onNavigate, onSelectStream }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {LIVE_STREAMS.slice(0, 4).map(stream => (
+          {(LIVE_STREAMS || []).slice(0, 4).map(stream => (
             <StreamCard
               key={stream.id}
               stream={stream}
               onSelectStream={onSelectStream}
-              onSelectCategory={(cat) => onNavigate('browse', { categorySlug: cat.slug })}
-              onSelectCreator={(cr) => onNavigate('channel', { username: cr.username })}
+              onSelectCategory={(cat) => onNavigate('browse', { categorySlug: cat?.slug })}
+              onSelectCreator={(cr) => onNavigate('channel', { username: cr?.username })}
             />
           ))}
         </div>
@@ -165,11 +167,11 @@ export function LandingPage({ onNavigate, onSelectStream }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          {CATEGORIES.slice(0, 4).map(cat => (
+          {(CATEGORIES || []).slice(0, 4).map(cat => (
             <CategoryCard
               key={cat.id}
               category={cat}
-              onSelectCategory={(c) => onNavigate('browse', { categorySlug: c.slug })}
+              onSelectCategory={(c) => onNavigate('category', { categorySlug: c?.slug })}
             />
           ))}
         </div>

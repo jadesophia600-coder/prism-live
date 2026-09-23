@@ -4,6 +4,7 @@ import { StreamProvider, useStream } from './context/StreamContext';
 import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/common/Toast';
 import { Navbar } from './components/common/Navbar';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 import { LandingPage } from './pages/LandingPage';
 import { DiscoverPage } from './pages/DiscoverPage';
@@ -21,7 +22,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { LIVE_STREAMS } from './data/mockData';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState('discover'); // Default Home page
+  const [currentPage, setCurrentPage] = useState('discover');
   const [pageParams, setPageParams] = useState({});
   const [activeStream, setActiveStream] = useState(LIVE_STREAMS[0]);
 
@@ -33,7 +34,7 @@ function AppContent() {
 
   const handleSelectStream = (stream) => {
     setActiveStream(stream);
-    handleNavigate('watch', { streamId: stream.id });
+    handleNavigate('watch', { streamId: stream?.id });
   };
 
   return (
@@ -47,60 +48,62 @@ function AppContent() {
         />
       )}
 
-      {/* Main Page Router */}
+      {/* Main Page Router wrapped in ErrorBoundary */}
       <div className="flex-1">
-        {currentPage === 'landing' && (
-          <LandingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
-        )}
-        {currentPage === 'discover' && (
-          <DiscoverPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
-        )}
-        {currentPage === 'browse' && (
-          <BrowsePage
-            onNavigate={handleNavigate}
-            onSelectStream={handleSelectStream}
-            categorySlug={pageParams.categorySlug}
-          />
-        )}
-        {currentPage === 'category' && (
-          <CategoryDetailPage
-            onNavigate={handleNavigate}
-            onSelectStream={handleSelectStream}
-            categorySlug={pageParams.categorySlug}
-          />
-        )}
-        {currentPage === 'following' && (
-          <FollowingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
-        )}
-        {currentPage === 'watch' && (
-          <WatchPage onNavigate={handleNavigate} stream={activeStream} />
-        )}
-        {currentPage === 'channel' && (
-          <ChannelPage
-            onNavigate={handleNavigate}
-            onSelectStream={handleSelectStream}
-            username={pageParams.username || 'NeonVortex'}
-          />
-        )}
-        {currentPage === 'dashboard' && (
-          <CreatorDashboard onNavigate={handleNavigate} />
-        )}
-        {currentPage === 'profile' && (
-          <UserProfilePage onNavigate={handleNavigate} initialModal={pageParams.modal} />
-        )}
-        {currentPage === 'search' && (
-          <SearchPage
-            onNavigate={handleNavigate}
-            onSelectStream={handleSelectStream}
-            query={pageParams.q}
-          />
-        )}
-        {currentPage === 'auth' && (
-          <AuthPages onNavigate={handleNavigate} />
-        )}
-        {currentPage === 'admin' && (
-          <AdminDashboard onNavigate={handleNavigate} />
-        )}
+        <ErrorBoundary>
+          {currentPage === 'landing' && (
+            <LandingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
+          )}
+          {currentPage === 'discover' && (
+            <DiscoverPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
+          )}
+          {currentPage === 'browse' && (
+            <BrowsePage
+              onNavigate={handleNavigate}
+              onSelectStream={handleSelectStream}
+              categorySlug={pageParams.categorySlug}
+            />
+          )}
+          {currentPage === 'category' && (
+            <CategoryDetailPage
+              onNavigate={handleNavigate}
+              onSelectStream={handleSelectStream}
+              categorySlug={pageParams.categorySlug}
+            />
+          )}
+          {currentPage === 'following' && (
+            <FollowingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
+          )}
+          {currentPage === 'watch' && (
+            <WatchPage onNavigate={handleNavigate} stream={activeStream} />
+          )}
+          {currentPage === 'channel' && (
+            <ChannelPage
+              onNavigate={handleNavigate}
+              onSelectStream={handleSelectStream}
+              username={pageParams.username || 'NeonVortex'}
+            />
+          )}
+          {currentPage === 'dashboard' && (
+            <CreatorDashboard onNavigate={handleNavigate} />
+          )}
+          {currentPage === 'profile' && (
+            <UserProfilePage onNavigate={handleNavigate} initialModal={pageParams.modal} />
+          )}
+          {currentPage === 'search' && (
+            <SearchPage
+              onNavigate={handleNavigate}
+              onSelectStream={handleSelectStream}
+              query={pageParams.q}
+            />
+          )}
+          {currentPage === 'auth' && (
+            <AuthPages onNavigate={handleNavigate} />
+          )}
+          {currentPage === 'admin' && (
+            <AdminDashboard onNavigate={handleNavigate} />
+          )}
+        </ErrorBoundary>
       </div>
 
       {/* Global Toast Alerts */}
@@ -111,12 +114,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <StreamProvider>
-        <ToastProvider>
-          <AppContent />
-        </ToastProvider>
-      </StreamProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <StreamProvider>
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
+        </StreamProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
