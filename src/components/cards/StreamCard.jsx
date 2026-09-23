@@ -1,0 +1,97 @@
+import React from 'react';
+import { Radio, CheckCircle, Eye } from 'lucide-react';
+
+export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectCreator }) {
+  return (
+    <div
+      onClick={() => onSelectStream && onSelectStream(stream)}
+      className="group relative flex flex-col rounded-2xl glass-panel bg-slate-900/60 border border-slate-800/80 overflow-hidden cursor-pointer hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 transform hover:-translate-y-1"
+    >
+      {/* Thumbnail Container */}
+      <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
+        <img
+          src={stream.thumbnail}
+          alt={stream.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+
+        {/* Live Badge */}
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-600/90 text-white font-bold text-[11px] tracking-wider uppercase backdrop-blur-md shadow-lg shadow-rose-600/40 badge-live-pulse">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+          LIVE
+        </div>
+
+        {/* Viewer Count Badge */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-950/80 text-slate-100 font-mono font-bold text-xs backdrop-blur-md border border-slate-800">
+          <Eye className="w-3.5 h-3.5 text-indigo-400" />
+          {stream.viewerCount >= 1000 ? `${(stream.viewerCount / 1000).toFixed(1)}k` : stream.viewerCount}
+        </div>
+
+        {/* Category Pill Overlay */}
+        <div className="absolute bottom-3 left-3">
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectCategory && onSelectCategory(stream.category);
+            }}
+            className="px-2.5 py-1 rounded-lg bg-slate-950/85 text-cyan-300 hover:text-white hover:bg-cyan-600/60 text-[11px] font-semibold backdrop-blur-md border border-cyan-500/30 transition-colors"
+          >
+            {stream.category.name}
+          </span>
+        </div>
+      </div>
+
+      {/* Stream Info Content */}
+      <div className="p-4 flex items-start gap-3">
+        {/* Creator Avatar */}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectCreator && onSelectCreator(stream.creator);
+          }}
+          className="relative shrink-0 group/avatar"
+        >
+          <img
+            src={stream.creator.avatar}
+            alt={stream.creator.displayName}
+            className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover/avatar:ring-indigo-400 transition-all"
+          />
+        </div>
+
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-bold text-slate-100 group-hover:text-indigo-300 transition-colors line-clamp-1 leading-snug">
+            {stream.title}
+          </h3>
+          
+          <div className="flex items-center gap-1.5 mt-1">
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectCreator && onSelectCreator(stream.creator);
+              }}
+              className="text-xs font-semibold text-slate-300 hover:text-cyan-400 transition-colors truncate"
+            >
+              {stream.creator.displayName}
+            </span>
+            {stream.creator.verified && (
+              <CheckCircle className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            )}
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1 mt-2.5">
+            {stream.tags.slice(0, 3).map((tag, idx) => (
+              <span
+                key={idx}
+                className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/50"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
