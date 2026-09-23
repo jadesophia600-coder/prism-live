@@ -41,6 +41,22 @@ export function AuthPages({ onNavigate }) {
     );
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        addToast('Please select a valid image file', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAvatarUrl(event.target.result);
+        addToast('Profile picture uploaded from device!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCustomAvatarApply = () => {
     if (customAvatarInput.trim()) {
       setAvatarUrl(customAvatarInput.trim());
@@ -172,20 +188,34 @@ export function AuthPages({ onNavigate }) {
                     ))}
                   </div>
 
-                  <div className="pt-2 flex items-center gap-2">
+                  <div className="pt-2 flex flex-wrap items-center gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="avatar-file-upload-auth"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                    <label
+                      htmlFor="avatar-file-upload-auth"
+                      className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-xs font-black text-white rounded-xl cursor-pointer transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 shrink-0"
+                    >
+                      <Upload className="w-3.5 h-3.5" /> Upload File From Device
+                    </label>
+
                     <input
                       type="url"
                       placeholder="Or paste custom image URL..."
                       value={customAvatarInput}
                       onChange={(e) => setCustomAvatarInput(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                      className="flex-1 min-w-[180px] bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                     />
                     <button
                       type="button"
                       onClick={handleCustomAvatarApply}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-cyan-300 rounded-xl transition-colors"
+                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-cyan-300 rounded-xl transition-colors"
                     >
-                      Apply
+                      Apply URL
                     </button>
                   </div>
                 </div>

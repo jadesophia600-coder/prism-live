@@ -23,8 +23,38 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
   // Edit profile local state
   const [editDisplayName, setEditDisplayName] = useState(user?.displayName || '');
   const [editBio, setEditBio] = useState(user?.bio || '');
+  const [editAvatar, setEditAvatar] = useState(user?.avatar || '');
   const [editQuality, setEditQuality] = useState(user?.defaultQuality || '1080p60');
   const [twoFactor, setTwoFactor] = useState(user?.twoFactorEnabled || false);
+
+  const handleDashboardFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        addToast('Please select a valid image file', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEditAvatar(event.target.result);
+        addToast('New profile picture loaded! Click Save to apply.', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSavePreferences = (e) => {
+    e.preventDefault();
+    setUser(prev => ({
+      ...prev,
+      displayName: editDisplayName,
+      bio: editBio,
+      avatar: editAvatar,
+      defaultQuality: editQuality,
+      twoFactorEnabled: twoFactor
+    }));
+    addToast('Account profile & preferences updated successfully!', 'success');
+  };
 
   const followedCreatorIds = user?.followedCreatorIds || [];
   const followedCreators = CREATORS.filter(c => followedCreatorIds.includes(c.id));
@@ -46,18 +76,6 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
   const handleClaimBonus = () => {
     setClaimedBonus(true);
     addToast('🎉 100 PRISM Welcome Tokens claimed & added to your balance!', 'success');
-  };
-
-  const handleSavePreferences = (e) => {
-    e.preventDefault();
-    setUser(prev => ({
-      ...prev,
-      displayName: editDisplayName,
-      bio: editBio,
-      defaultQuality: editQuality,
-      twoFactorEnabled: twoFactor
-    }));
-    addToast('Account profile & preferences updated successfully!', 'success');
   };
 
   const handleConfirmUpgrade = () => {
@@ -330,7 +348,7 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                           </p>
                           <p className="text-[11px] text-slate-400 font-medium truncate">{stream.creatorName}</p>
                           <span className="inline-block px-2 py-0.5 mt-1 rounded-md bg-slate-800 text-[10px] text-cyan-400 font-bold">
-                            {stream.category}
+                            {typeof stream.category === 'object' ? stream.category?.name : (stream.category || 'General')}
                           </span>
                         </div>
                       </div>
@@ -518,6 +536,34 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
               </h2>
 
               <form onSubmit={handleSavePreferences} className="space-y-5">
+                {/* Profile Picture Uploader */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <label className="text-xs font-extrabold text-cyan-400 block">Profile Picture Avatar</label>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={editAvatar || user?.avatar}
+                      alt=""
+                      className="w-16 h-16 rounded-full object-cover ring-2 ring-indigo-500/40"
+                    />
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="dashboard-avatar-upload"
+                        className="hidden"
+                        onChange={handleDashboardFileUpload}
+                      />
+                      <label
+                        htmlFor="dashboard-avatar-upload"
+                        className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-cyan-400 text-xs font-black text-white rounded-xl cursor-pointer hover:scale-102 transition-all shadow-md inline-flex items-center gap-2"
+                      >
+                        <User className="w-3.5 h-3.5" /> Upload Photo from Device
+                      </label>
+                      <p className="text-[11px] text-slate-400">Supports PNG, JPG, JPEG, WEBP files</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-xs font-bold text-slate-300 mb-1 block">Display Name</label>
                   <input
