@@ -24,7 +24,7 @@ export class DBService {
     let streams = [...LIVE_STREAMS];
 
     if (filters.categorySlug) {
-      streams = streams.filter(s => s.category.slug === filters.categorySlug);
+      streams = streams.filter(s => s.category && s.category.slug === filters.categorySlug);
     }
     if (filters.subcategory) {
       streams = streams.filter(s => s.subcategory === filters.subcategory);
@@ -32,11 +32,11 @@ export class DBService {
     if (filters.query) {
       const q = filters.query.toLowerCase();
       streams = streams.filter(s =>
-        s.title.toLowerCase().includes(q) ||
-        s.creator.displayName.toLowerCase().includes(q) ||
-        s.category.name.toLowerCase().includes(q) ||
+        (s.title && s.title.toLowerCase().includes(q)) ||
+        (s.creator && s.creator.displayName && s.creator.displayName.toLowerCase().includes(q)) ||
+        (s.category && s.category.name && s.category.name.toLowerCase().includes(q)) ||
         (s.subcategory && s.subcategory.toLowerCase().includes(q)) ||
-        s.tags.some(t => t.toLowerCase().includes(q))
+        (s.tags && s.tags.some(t => t.toLowerCase().includes(q)))
       );
     }
     if (filters.sortBy === "most_viewers") {
@@ -49,6 +49,7 @@ export class DBService {
   }
 
   static getStreamById(id) {
+    if (!id) return LIVE_STREAMS[0];
     return LIVE_STREAMS.find(s => s.id === id) || LIVE_STREAMS[0];
   }
 
@@ -57,34 +58,38 @@ export class DBService {
   }
 
   static getCategoryBySlug(slug) {
-    return CATEGORIES.find(c => c.slug.toLowerCase() === slug.toLowerCase()) || CATEGORIES[0];
+    if (!slug) return CATEGORIES[0];
+    const target = slug.toString().toLowerCase();
+    return CATEGORIES.find(c => c.slug && c.slug.toLowerCase() === target) || CATEGORIES[0];
   }
 
   static getCreatorByUsername(username) {
-    return CREATORS.find(c => c.username.toLowerCase() === username.toLowerCase()) || CREATORS[0];
+    if (!username) return CREATORS[0];
+    const target = username.toString().toLowerCase();
+    return CREATORS.find(c => c.username && c.username.toLowerCase() === target) || CREATORS[0];
   }
 
   static searchAll(query) {
     if (!query) return { streams: [], creators: [], categories: [], clips: [] };
 
-    const q = query.toLowerCase();
+    const q = query.toString().toLowerCase();
     const streams = LIVE_STREAMS.filter(s =>
-      s.title.toLowerCase().includes(q) ||
-      s.category.name.toLowerCase().includes(q) ||
+      (s.title && s.title.toLowerCase().includes(q)) ||
+      (s.category && s.category.name && s.category.name.toLowerCase().includes(q)) ||
       (s.subcategory && s.subcategory.toLowerCase().includes(q)) ||
-      s.tags.some(t => t.toLowerCase().includes(q))
+      (s.tags && s.tags.some(t => t.toLowerCase().includes(q)))
     );
     const creators = CREATORS.filter(c =>
-      c.displayName.toLowerCase().includes(q) ||
-      c.username.toLowerCase().includes(q) ||
-      c.bio.toLowerCase().includes(q)
+      (c.displayName && c.displayName.toLowerCase().includes(q)) ||
+      (c.username && c.username.toLowerCase().includes(q)) ||
+      (c.bio && c.bio.toLowerCase().includes(q))
     );
     const categories = CATEGORIES.filter(cat =>
-      cat.name.toLowerCase().includes(q) ||
-      cat.description.toLowerCase().includes(q) ||
-      cat.subcategories.some(sub => sub.toLowerCase().includes(q))
+      (cat.name && cat.name.toLowerCase().includes(q)) ||
+      (cat.description && cat.description.toLowerCase().includes(q)) ||
+      (cat.subcategories && cat.subcategories.some(sub => sub.toLowerCase().includes(q)))
     );
-    const clips = CLIPS.filter(cl => cl.title.toLowerCase().includes(q));
+    const clips = CLIPS.filter(cl => cl.title && cl.title.toLowerCase().includes(q));
 
     return { streams, creators, categories, clips };
   }

@@ -12,8 +12,9 @@ export function Sidebar({ onNavigate, onSelectStream, activeStreamId, currentPag
   const [categoriesOpen, setCategoriesOpen] = useState(true);
 
   // Filter streams by followed creators
-  const followedStreams = LIVE_STREAMS.filter(s => user.followedCreatorIds.includes(s.creator.id));
-  const recommendedStreams = LIVE_STREAMS.filter(s => !user.followedCreatorIds.includes(s.creator.id));
+  const followedCreatorIds = user?.followedCreatorIds || [];
+  const followedStreams = LIVE_STREAMS.filter(s => s.creator && followedCreatorIds.includes(s.creator.id));
+  const recommendedStreams = LIVE_STREAMS.filter(s => s.creator && !followedCreatorIds.includes(s.creator.id));
 
   return (
     <aside

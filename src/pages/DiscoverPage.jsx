@@ -16,8 +16,9 @@ export function DiscoverPage({ onNavigate, onSelectStream }) {
   const [activeHeroStream, setActiveHeroStream] = useState(LIVE_STREAMS[0]);
 
   // Personalization logic based on user authentication state
-  const followedStreams = LIVE_STREAMS.filter(s => user.followedCreatorIds.includes(s.creator.id));
-  const recommendedForYou = LIVE_STREAMS.filter(s => !user.followedCreatorIds.includes(s.creator.id));
+  const followedCreatorIds = user?.followedCreatorIds || [];
+  const followedStreams = LIVE_STREAMS.filter(s => s.creator && followedCreatorIds.includes(s.creator.id));
+  const recommendedForYou = LIVE_STREAMS.filter(s => s.creator && !followedCreatorIds.includes(s.creator.id));
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">

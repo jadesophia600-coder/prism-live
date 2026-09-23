@@ -18,8 +18,8 @@ export function ChannelPage({ onNavigate, onSelectStream, username }) {
   const [activeTab, setActiveTab] = useState('live');
 
   const creator = DBService.getCreatorByUsername(username);
-  const liveStream = DBService.getLiveStreams().find(s => s.creator.username.toLowerCase() === creator.username.toLowerCase());
-  const isFollowing = user.followedCreatorIds.includes(creator.id);
+  const liveStream = DBService.getLiveStreams().find(s => s.creator && s.creator.username.toLowerCase() === creator?.username?.toLowerCase());
+  const isFollowing = (user?.followedCreatorIds || []).includes(creator?.id);
 
   const handleFollow = () => {
     followCreator(creator.id);

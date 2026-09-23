@@ -15,7 +15,8 @@ export function UserProfilePage({ onNavigate, initialModal }) {
   const { addToast } = useToast();
   const [showUpgradeModal, setShowUpgradeModal] = useState(initialModal === 'upgrade');
 
-  const followedCreators = CREATORS.filter(c => user.followedCreatorIds.includes(c.id));
+  const followedCreatorIds = user?.followedCreatorIds || [];
+  const followedCreators = CREATORS.filter(c => followedCreatorIds.includes(c.id));
 
   const handleConfirmUpgrade = () => {
     upgradeToCreator();

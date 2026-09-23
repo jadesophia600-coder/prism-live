@@ -10,8 +10,9 @@ import { Heart, Radio, Users } from 'lucide-react';
 export function FollowingPage({ onNavigate, onSelectStream }) {
   const { user } = useAuth();
 
-  const followedStreams = LIVE_STREAMS.filter(s => user.followedCreatorIds.includes(s.creator.id));
-  const followedCreators = CREATORS.filter(c => user.followedCreatorIds.includes(c.id));
+  const followedCreatorIds = user?.followedCreatorIds || [];
+  const followedStreams = LIVE_STREAMS.filter(s => s.creator && followedCreatorIds.includes(s.creator.id));
+  const followedCreators = CREATORS.filter(c => followedCreatorIds.includes(c.id));
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">

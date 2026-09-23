@@ -25,8 +25,8 @@ export function WatchPage({ onNavigate, stream }) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
 
-  const isFollowing = user.followedCreatorIds.includes(stream.creator.id);
-  const isSubscribed = user.subscriptions.includes(stream.creator.id);
+  const isFollowing = (user?.followedCreatorIds || []).includes(stream?.creator?.id);
+  const isSubscribed = (user?.subscriptions || []).includes(stream?.creator?.id);
 
   const handleFollowToggle = () => {
     followCreator(stream.creator.id);
