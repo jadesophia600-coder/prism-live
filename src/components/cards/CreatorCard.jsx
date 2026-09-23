@@ -6,7 +6,10 @@ import { CheckCircle, Heart, Users, Sparkles } from 'lucide-react';
 export function CreatorCard({ creator, onSelectCreator }) {
   const { user, followCreator } = useAuth();
   const { addToast } = useToast();
-  const isFollowing = user.followedCreatorIds.includes(creator.id);
+
+  if (!creator) return null;
+
+  const isFollowing = (user?.followedCreatorIds || []).includes(creator.id);
 
   const handleFollowToggle = (e) => {
     e.stopPropagation();
@@ -51,7 +54,7 @@ export function CreatorCard({ creator, onSelectCreator }) {
       {/* Followers stats */}
       <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium mb-4">
         <Users className="w-3.5 h-3.5 text-indigo-400" />
-        <span className="font-bold text-white font-mono">{(creator.followersCount / 1000).toFixed(1)}k</span> Followers
+        <span className="font-bold text-white font-mono">{creator.followersCount ? (creator.followersCount / 1000).toFixed(1) : 0}k</span> Followers
       </div>
 
       {/* Follow CTA */}

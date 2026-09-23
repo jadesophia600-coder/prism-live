@@ -2,6 +2,8 @@ import React from 'react';
 import { Play, Eye, Scissors } from 'lucide-react';
 
 export function ClipCard({ clip, onSelectClip }) {
+  if (!clip) return null;
+
   return (
     <div
       onClick={() => onSelectClip && onSelectClip(clip)}
@@ -9,8 +11,8 @@ export function ClipCard({ clip, onSelectClip }) {
     >
       <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
         <img
-          src={clip.thumbnail}
-          alt={clip.title}
+          src={clip.thumbnail || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=500&q=80"}
+          alt={clip.title || "Clip"}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -26,18 +28,18 @@ export function ClipCard({ clip, onSelectClip }) {
 
         {/* Duration */}
         <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-slate-950/80 text-white font-mono text-[11px] backdrop-blur-md">
-          {clip.duration}
+          {clip.duration || "0:30"}
         </div>
       </div>
 
       <div className="p-3.5 space-y-1">
         <h4 className="text-xs font-bold text-white group-hover:text-pink-300 transition-colors line-clamp-1">
-          {clip.title}
+          {clip.title || "Highlight Clip"}
         </h4>
         <div className="flex items-center justify-between text-[11px] text-slate-400">
-          <span>Clipped by <strong className="text-slate-200">{clip.clipper}</strong></span>
+          <span>Clipped by <strong className="text-slate-200">{clip.clipper || "Viewer"}</strong></span>
           <span className="flex items-center gap-1 font-mono text-indigo-300">
-            <Eye className="w-3 h-3" /> {clip.views}
+            <Eye className="w-3 h-3" /> {clip.views || 0}
           </span>
         </div>
       </div>

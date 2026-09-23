@@ -2,6 +2,9 @@ import React from 'react';
 import { Eye, Radio } from 'lucide-react';
 
 export function CategoryCard({ category, onSelectCategory }) {
+  if (!category) return null;
+  const tagsList = category.subcategories || category.tags || [];
+
   return (
     <div
       onClick={() => onSelectCategory && onSelectCategory(category)}
@@ -18,7 +21,7 @@ export function CategoryCard({ category, onSelectCategory }) {
         {/* Live Channel count pill */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-950/85 text-cyan-400 font-mono font-bold text-xs backdrop-blur-md border border-cyan-500/30">
           <Radio className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-          {category.channels} Live
+          {category.channels || 0} Live
         </div>
 
         {/* Content */}
@@ -30,12 +33,12 @@ export function CategoryCard({ category, onSelectCategory }) {
           <div className="flex items-center gap-3 text-xs text-slate-300 font-medium">
             <span className="flex items-center gap-1 font-mono text-indigo-300">
               <Eye className="w-3.5 h-3.5 text-indigo-400" />
-              {(category.viewers / 1000).toFixed(1)}k Viewers
+              {category.viewers ? (category.viewers / 1000).toFixed(1) : 0}k Viewers
             </span>
           </div>
 
           <div className="flex flex-wrap gap-1 pt-1">
-            {category.tags.map((t, idx) => (
+            {tagsList.slice(0, 3).map((t, idx) => (
               <span key={idx} className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700/60">
                 {t}
               </span>
