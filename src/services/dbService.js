@@ -1,6 +1,25 @@
+import { supabase } from "../lib/supabaseClient";
 import { LIVE_STREAMS, CATEGORIES, CREATORS, PAST_VODS, CLIPS } from "../data/mockData";
 
 export class DBService {
+  // Fetch live streams from Supabase with fallback to local mock data
+  static async getLiveStreamsAsync(filters = {}) {
+    try {
+      let query = supabase.from('streams').select('*, creators(*), categories(*)');
+      if (filters.categorySlug) {
+        query = query.eq('categories.slug', filters.categorySlug);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    } catch (e) {
+      console.warn("Supabase fetch fallback to mockData:", e);
+    }
+    return this.getLiveStreams(filters);
+  }
+
+  // Synchronous getter with mockData fallback
   static getLiveStreams(filters = {}) {
     let streams = [...LIVE_STREAMS];
 
