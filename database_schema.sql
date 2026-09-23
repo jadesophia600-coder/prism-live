@@ -71,7 +71,21 @@ CREATE TABLE categories (
     cover_image_url TEXT,
     icon_name VARCHAR(50),
     live_stream_count INT DEFAULT 0,
-    total_viewers INT DEFAULT 0
+    total_viewers INT DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 5b. SUBCATEGORIES
+CREATE TABLE subcategories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    icon_name VARCHAR(50),
+    live_stream_count INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 6. TAGS
@@ -86,6 +100,7 @@ CREATE TABLE streams (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     channel_id UUID NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
     category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+    subcategory_id UUID REFERENCES subcategories(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     thumbnail_url TEXT,
     language VARCHAR(10) DEFAULT 'en',
@@ -103,7 +118,7 @@ CREATE TABLE stream_tags (
     PRIMARY KEY (stream_id, tag_id)
 );
 
--- 8. STREAM SESSIONS (Historical metrics)
+-- 8. STREAM SESSIONS
 CREATE TABLE stream_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     stream_id UUID NOT NULL REFERENCES streams(id) ON DELETE CASCADE,
@@ -234,7 +249,7 @@ CREATE TABLE stream_analytics (
     bitrate_kbps INT DEFAULT 6000
 );
 
--- 19. TRANSACTIONS (Tips & Subscriptions)
+-- 19. TRANSACTIONS
 CREATE TABLE transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -258,7 +273,8 @@ CREATE TABLE platform_settings (
 -- INDEXES FOR MAXIMUM QUERY PERFORMANCE
 CREATE INDEX idx_streams_is_live ON streams(is_live);
 CREATE INDEX idx_streams_category ON streams(category_id);
+CREATE INDEX idx_streams_subcategory ON streams(subcategory_id);
+CREATE INDEX idx_subcategories_category ON subcategories(category_id);
 CREATE INDEX idx_chat_messages_stream ON chat_messages(stream_id, created_at);
 CREATE INDEX idx_followers_creator ON followers(creator_id);
 CREATE INDEX idx_subscriptions_creator ON subscriptions(creator_id);
-CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);

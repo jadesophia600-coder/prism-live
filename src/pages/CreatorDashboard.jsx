@@ -12,16 +12,28 @@ export function CreatorDashboard({ onNavigate }) {
   const { user, setUser } = useAuth();
   const { addToast } = useToast();
   
-  const [activeTab, setActiveTab] = useState('stream_setup'); // 'overview' | 'stream_setup' | 'analytics' | 'moderation' | 'monetization'
+  const [activeTab, setActiveTab] = useState('stream_setup');
   const [copiedKey, setCopiedKey] = useState(false);
   const [isTestLive, setIsTestLive] = useState(false);
 
   // Form states for Go Live
-  const [streamTitle, setStreamTitle] = useState('Building a Production Live Streaming App with React 19 & WebSockets Live!');
-  const [category, setCategory] = useState(CATEGORIES[1].id);
-  const [description, setDescription] = useState('In this live session we are architecting real-time video chat, custom state management, and responsive layouts.');
-  const [tags, setTags] = useState('React, Live Coding, WebSockets, AI');
+  const [streamTitle, setStreamTitle] = useState('The Future of AI Agents & LLMs: Live Founder Panel & Q&A Session');
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState('podcasts');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('Technology');
+  const [description, setDescription] = useState('Join us for a live panel featuring top AI founders discussing autonomous agents and LLM inference.');
+  const [tags, setTags] = useState('AI, Podcast, Technology, Interview');
   const [visibility, setVisibility] = useState('public');
+
+  const selectedCategoryObj = CATEGORIES.find(c => c.slug === selectedCategorySlug) || CATEGORIES[0];
+
+  const handleCategoryChange = (e) => {
+    const newSlug = e.target.value;
+    setSelectedCategorySlug(newSlug);
+    const cat = CATEGORIES.find(c => c.slug === newSlug);
+    if (cat && cat.subcategories.length > 0) {
+      setSelectedSubcategory(cat.subcategories[0]);
+    }
+  };
 
   const copyStreamKey = () => {
     navigator.clipboard.writeText(user.streamKey || 'live_sk_prism_demo_9a8f7c6b5a4d3e2f');
@@ -38,7 +50,7 @@ export function CreatorDashboard({ onNavigate }) {
 
   const handleSaveStreamSettings = (e) => {
     e.preventDefault();
-    addToast('Stream metadata & OBS settings saved!', 'success');
+    addToast(`Saved stream metadata! Category: ${selectedCategoryObj.name} (${selectedSubcategory})`, 'success');
   };
 
   return (
@@ -52,7 +64,7 @@ export function CreatorDashboard({ onNavigate }) {
           </div>
           <div>
             <h1 className="text-xl font-extrabold text-white">Creator Studio Control Center</h1>
-            <p className="text-xs text-slate-400">Manage stream configuration, broadcast ingest, and channel analytics</p>
+            <p className="text-xs text-slate-400">Configure broadcast metadata, categories, subcategories & OBS ingest</p>
           </div>
         </div>
 
@@ -112,7 +124,6 @@ export function CreatorDashboard({ onNavigate }) {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               
-              {/* Metric Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div className="p-5 rounded-2xl glass-panel bg-slate-900/60 border border-slate-800 space-y-1">
                   <p className="text-xs text-slate-400 font-semibold uppercase">Current Live Viewers</p>
@@ -139,25 +150,6 @@ export function CreatorDashboard({ onNavigate }) {
                 </div>
               </div>
 
-              {/* Dynamic Analytics SVG Chart */}
-              <div className="p-6 rounded-3xl glass-panel bg-slate-900/80 border border-slate-800 space-y-4">
-                <h3 className="text-sm font-extrabold text-white">Viewer Concurrency & Peak Trends</h3>
-                <div className="h-48 w-full flex items-end justify-between gap-2 pt-8 pb-2 px-4 border-b border-slate-800 font-mono text-xs text-slate-400">
-                  {CREATOR_ANALYTICS.viewerHistory.map((item, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                      <div className="text-[10px] text-cyan-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.count.toLocaleString()}
-                      </div>
-                      <div
-                        className="w-full max-w-[40px] bg-gradient-to-t from-indigo-600 to-cyan-400 rounded-t-lg transition-all duration-500 group-hover:brightness-125"
-                        style={{ height: `${(item.count / 60000) * 100}%` }}
-                      />
-                      <span>{item.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
           )}
 
@@ -165,7 +157,7 @@ export function CreatorDashboard({ onNavigate }) {
           {activeTab === 'stream_setup' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
-              {/* Left Column: Metadata Settings Form */}
+              {/* Left Column: Metadata & Category/Subcategory Settings Form */}
               <div className="lg:col-span-7 space-y-6">
                 <form onSubmit={handleSaveStreamSettings} className="glass-panel bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-5">
                   <h3 className="text-base font-extrabold text-white flex items-center gap-2">
@@ -182,20 +174,36 @@ export function CreatorDashboard({ onNavigate }) {
                     />
                   </div>
 
+                  {/* Category & Subcategory Pickers */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Category</label>
+                      <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Main Category</label>
                       <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        value={selectedCategorySlug}
+                        onChange={handleCategoryChange}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-bold"
                       >
                         {CATEGORIES.map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
+                          <option key={c.id} value={c.slug}>{c.name}</option>
                         ))}
                       </select>
                     </div>
 
+                    <div>
+                      <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Subcategory</label>
+                      <select
+                        value={selectedSubcategory}
+                        onChange={(e) => setSelectedSubcategory(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-cyan-300 font-bold focus:outline-none focus:border-cyan-500"
+                      >
+                        {selectedCategoryObj.subcategories.map((sub, idx) => (
+                          <option key={idx} value={sub}>{sub}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Visibility</label>
                       <select
@@ -208,16 +216,16 @@ export function CreatorDashboard({ onNavigate }) {
                         <option value="subscribers">Subscribers Only</option>
                       </select>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Tags (comma separated)</label>
-                    <input
-                      type="text"
-                      value={tags}
-                      onChange={(e) => setTags(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-                    />
+                    <div>
+                      <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Tags (comma separated)</label>
+                      <input
+                        type="text"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -234,15 +242,13 @@ export function CreatorDashboard({ onNavigate }) {
                     type="submit"
                     className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all"
                   >
-                    Save Stream Information
+                    Save Broadcast Information
                   </button>
                 </form>
               </div>
 
-              {/* Right Column: OBS / Encoder Connection Details */}
+              {/* Right Column: OBS / Encoder Credentials */}
               <div className="lg:col-span-5 space-y-6">
-                
-                {/* Stream Credentials Box */}
                 <div className="glass-panel bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-5">
                   <h3 className="text-base font-extrabold text-white flex items-center gap-2">
                     <Cpu className="w-5 h-5 text-cyan-400" /> Encoder Ingest Credentials
@@ -285,58 +291,23 @@ export function CreatorDashboard({ onNavigate }) {
                     </div>
                   </div>
 
-                  {/* OBS Setup Guide Box */}
                   <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-3 text-xs text-slate-300">
                     <p className="font-bold text-white flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-cyan-400" /> OBS / Streamlabs Connection Setup:
+                      <Sparkles className="w-4 h-4 text-cyan-400" /> OBS / Streamlabs Connection Guide:
                     </p>
                     <ol className="list-decimal list-inside space-y-1.5 text-slate-400 leading-relaxed">
                       <li>Open <strong className="text-white">OBS Studio</strong> or <strong className="text-white">Streamlabs Desktop</strong>.</li>
                       <li>Go to <strong className="text-white">Settings → Stream</strong>.</li>
                       <li>Select Service: <strong className="text-white">Custom...</strong></li>
-                      <li>Paste the RTMP URL above into <strong className="text-white">Server</strong>.</li>
+                      <li>Paste RTMP URL into <strong className="text-white">Server</strong>.</li>
                       <li>Paste your Stream Key into <strong className="text-white">Stream Key</strong>.</li>
                       <li>Click <strong className="text-white">Start Streaming</strong>!</li>
                     </ol>
                   </div>
 
                 </div>
-
               </div>
 
-            </div>
-          )}
-
-          {/* TAB 3: ANALYTICS & REVENUE */}
-          {activeTab === 'analytics' && (
-            <div className="space-y-6">
-              <div className="glass-panel bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-4">
-                <h3 className="text-sm font-extrabold text-white">Revenue Split Breakdown (85% Creator Payout)</h3>
-                <div className="grid grid-cols-3 gap-4 font-mono text-xs text-center">
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                    <p className="text-slate-400">Subscriptions Payout</p>
-                    <p className="text-2xl font-black text-indigo-400 mt-1">${CREATOR_ANALYTICS.revenueBreakdown.subs.toLocaleString()}</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                    <p className="text-slate-400">Bits & Cheer Tips</p>
-                    <p className="text-2xl font-black text-amber-400 mt-1">${CREATOR_ANALYTICS.revenueBreakdown.tips.toLocaleString()}</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                    <p className="text-slate-400">Ad Share</p>
-                    <p className="text-2xl font-black text-emerald-400 mt-1">${CREATOR_ANALYTICS.revenueBreakdown.adShare.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: MODERATION & CHAT */}
-          {activeTab === 'moderation' && (
-            <div className="space-y-6">
-              <div className="glass-panel bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-4">
-                <h3 className="text-sm font-extrabold text-white">Channel Banned Users & Filters</h3>
-                <p className="text-xs text-slate-400">No users currently banned on this channel.</p>
-              </div>
             </div>
           )}
 

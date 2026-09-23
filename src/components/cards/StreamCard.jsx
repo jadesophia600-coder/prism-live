@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, CheckCircle, Eye } from 'lucide-react';
+import { Radio, CheckCircle, Eye, Globe } from 'lucide-react';
 
 export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectCreator }) {
   return (
@@ -16,7 +16,7 @@ export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectC
         />
 
         {/* Live Badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-600/90 text-white font-bold text-[11px] tracking-wider uppercase backdrop-blur-md shadow-lg shadow-rose-600/40 badge-live-pulse">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-600/90 text-white font-bold text-[11px] tracking-wider uppercase backdrop-blur-md shadow-lg badge-live-pulse">
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
           LIVE
         </div>
@@ -27,17 +27,22 @@ export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectC
           {stream.viewerCount >= 1000 ? `${(stream.viewerCount / 1000).toFixed(1)}k` : stream.viewerCount}
         </div>
 
-        {/* Category Pill Overlay */}
-        <div className="absolute bottom-3 left-3">
+        {/* Category & Subcategory Overlay */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
           <span
             onClick={(e) => {
               e.stopPropagation();
               onSelectCategory && onSelectCategory(stream.category);
             }}
-            className="px-2.5 py-1 rounded-lg bg-slate-950/85 text-cyan-300 hover:text-white hover:bg-cyan-600/60 text-[11px] font-semibold backdrop-blur-md border border-cyan-500/30 transition-colors"
+            className="px-2 py-0.5 rounded-lg bg-slate-950/85 text-cyan-300 hover:text-white hover:bg-cyan-600/60 text-[10px] font-semibold backdrop-blur-md border border-cyan-500/30 transition-colors"
           >
             {stream.category.name}
           </span>
+          {stream.subcategory && (
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-950/85 text-indigo-300 text-[10px] font-semibold backdrop-blur-md border border-indigo-500/30">
+              {stream.subcategory}
+            </span>
+          )}
         </div>
       </div>
 
@@ -79,12 +84,17 @@ export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectC
             )}
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1 mt-2.5">
-            {stream.tags.slice(0, 3).map((tag, idx) => (
+          {/* Tags & Language */}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {stream.language && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+                {stream.language}
+              </span>
+            )}
+            {stream.tags.slice(0, 2).map((tag, idx) => (
               <span
                 key={idx}
-                className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/50"
+                className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-800/80 text-slate-400 border border-slate-700/50"
               >
                 {tag}
               </span>

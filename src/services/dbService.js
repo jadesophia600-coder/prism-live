@@ -1,6 +1,5 @@
 import { LIVE_STREAMS, CATEGORIES, CREATORS, PAST_VODS, CLIPS } from "../data/mockData";
 
-// Database Service abstraction representing PostgreSQL / Supabase operations
 export class DBService {
   static getLiveStreams(filters = {}) {
     let streams = [...LIVE_STREAMS];
@@ -8,11 +7,16 @@ export class DBService {
     if (filters.categorySlug) {
       streams = streams.filter(s => s.category.slug === filters.categorySlug);
     }
+    if (filters.subcategory) {
+      streams = streams.filter(s => s.subcategory === filters.subcategory);
+    }
     if (filters.query) {
       const q = filters.query.toLowerCase();
       streams = streams.filter(s =>
         s.title.toLowerCase().includes(q) ||
         s.creator.displayName.toLowerCase().includes(q) ||
+        s.category.name.toLowerCase().includes(q) ||
+        (s.subcategory && s.subcategory.toLowerCase().includes(q)) ||
         s.tags.some(t => t.toLowerCase().includes(q))
       );
     }
@@ -34,7 +38,7 @@ export class DBService {
   }
 
   static getCategoryBySlug(slug) {
-    return CATEGORIES.find(c => c.slug === slug) || CATEGORIES[0];
+    return CATEGORIES.find(c => c.slug.toLowerCase() === slug.toLowerCase()) || CATEGORIES[0];
   }
 
   static getCreatorByUsername(username) {
@@ -47,15 +51,19 @@ export class DBService {
     const q = query.toLowerCase();
     const streams = LIVE_STREAMS.filter(s =>
       s.title.toLowerCase().includes(q) ||
+      s.category.name.toLowerCase().includes(q) ||
+      (s.subcategory && s.subcategory.toLowerCase().includes(q)) ||
       s.tags.some(t => t.toLowerCase().includes(q))
     );
     const creators = CREATORS.filter(c =>
       c.displayName.toLowerCase().includes(q) ||
-      c.username.toLowerCase().includes(q)
+      c.username.toLowerCase().includes(q) ||
+      c.bio.toLowerCase().includes(q)
     );
     const categories = CATEGORIES.filter(cat =>
       cat.name.toLowerCase().includes(q) ||
-      cat.tags.some(t => t.toLowerCase().includes(q))
+      cat.description.toLowerCase().includes(q) ||
+      cat.subcategories.some(sub => sub.toLowerCase().includes(q))
     );
     const clips = CLIPS.filter(cl => cl.title.toLowerCase().includes(q));
 

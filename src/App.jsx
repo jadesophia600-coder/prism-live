@@ -8,6 +8,8 @@ import { Navbar } from './components/common/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { BrowsePage } from './pages/BrowsePage';
+import { CategoryDetailPage } from './pages/CategoryDetailPage';
+import { FollowingPage } from './pages/FollowingPage';
 import { WatchPage } from './pages/WatchPage';
 import { ChannelPage } from './pages/ChannelPage';
 import { CreatorDashboard } from './pages/CreatorDashboard';
@@ -19,7 +21,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { LIVE_STREAMS } from './data/mockData';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState('landing');
+  const [currentPage, setCurrentPage] = useState('discover'); // Default Home page
   const [pageParams, setPageParams] = useState({});
   const [activeStream, setActiveStream] = useState(LIVE_STREAMS[0]);
 
@@ -36,7 +38,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-      {/* Global Navigation Header (Shown on all pages except full auth) */}
+      {/* Navbar Header */}
       {currentPage !== 'auth' && (
         <Navbar
           onNavigate={handleNavigate}
@@ -45,7 +47,7 @@ function AppContent() {
         />
       )}
 
-      {/* Page Routing */}
+      {/* Main Page Router */}
       <div className="flex-1">
         {currentPage === 'landing' && (
           <LandingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
@@ -59,6 +61,16 @@ function AppContent() {
             onSelectStream={handleSelectStream}
             categorySlug={pageParams.categorySlug}
           />
+        )}
+        {currentPage === 'category' && (
+          <CategoryDetailPage
+            onNavigate={handleNavigate}
+            onSelectStream={handleSelectStream}
+            categorySlug={pageParams.categorySlug}
+          />
+        )}
+        {currentPage === 'following' && (
+          <FollowingPage onNavigate={handleNavigate} onSelectStream={handleSelectStream} />
         )}
         {currentPage === 'watch' && (
           <WatchPage onNavigate={handleNavigate} stream={activeStream} />

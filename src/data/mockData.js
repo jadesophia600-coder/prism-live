@@ -1,83 +1,135 @@
 export const CATEGORIES = [
   {
-    id: "cat-1",
-    name: "Cyberpunk & Action RPGs",
-    slug: "cyberpunk-rpg",
+    id: "cat-gaming",
+    name: "Gaming",
+    slug: "gaming",
+    description: "Live gameplay, speedruns, esports tournaments, and interactive gaming communities.",
     cover: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80",
-    viewers: 142800,
-    channels: 342,
+    viewers: 289400,
+    channels: 542,
     icon: "Gamepad2",
-    tags: ["Cyberpunk", "Open World", "Action"]
+    subcategories: ["Action Games", "Sports Games", "RPG", "FPS", "Strategy", "Simulation", "Esports"]
   },
   {
-    id: "cat-2",
-    name: "Software & AI Live Dev",
-    slug: "software-ai",
-    cover: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
-    viewers: 98400,
-    channels: 184,
-    icon: "Code2",
-    tags: ["Coding", "React", "AI", "TypeScript"]
+    id: "cat-entertainment",
+    name: "Entertainment",
+    slug: "entertainment",
+    description: "Live comedy, reality shows, variety acts, celebrity broadcasts, and interactive challenges.",
+    cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
+    viewers: 142800,
+    channels: 210,
+    icon: "Tv",
+    subcategories: ["Live Entertainment", "Comedy", "Reality", "Celebrity", "Variety", "Challenges", "Shows"]
   },
   {
-    id: "cat-3",
-    name: "Synthwave & Live DJ Sets",
-    slug: "music-dj",
-    cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
-    viewers: 76200,
-    channels: 95,
-    icon: "Music",
-    tags: ["Live Music", "DJ Set", "Synthwave"]
-  },
-  {
-    id: "cat-4",
-    name: "Esports Arena",
-    slug: "esports-arena",
-    cover: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80",
-    viewers: 310500,
-    channels: 512,
-    icon: "Trophy",
-    tags: ["Competitive", "Tournament", "Esports"]
-  },
-  {
-    id: "cat-5",
-    name: "IRL & City Explorers",
-    slug: "irl-travel",
-    cover: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
-    viewers: 89300,
-    channels: 230,
-    icon: "MapPin",
-    tags: ["IRL", "Tokyo", "Travel", "Vlog"]
-  },
-  {
-    id: "cat-6",
-    name: "Talk Shows & Tech Podcasts",
-    slug: "talk-shows",
+    id: "cat-podcasts",
+    name: "Podcasts",
+    slug: "podcasts",
+    description: "Live video podcasts, expert interviews, technology discussions, and personal growth talks.",
     cover: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=600&q=80",
-    viewers: 45100,
-    channels: 88,
+    viewers: 198400,
+    channels: 318,
     icon: "Mic",
-    tags: ["Podcast", "Q&A", "Discussion"]
+    subcategories: ["Interviews", "Business Podcasts", "Technology", "Relationships", "News & Discussion", "Personal Development", "Comedy Podcasts"]
   },
   {
-    id: "cat-7",
-    name: "Creative & Digital Art",
-    slug: "creative-art",
-    cover: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-    viewers: 32600,
-    channels: 114,
-    icon: "Palette",
-    tags: ["Art", "3D Design", "Blender"]
+    id: "cat-music",
+    name: "Music",
+    slug: "music",
+    description: "Live DJ sets, synthwave concerts, freestyle sessions, music production, and live vocals.",
+    cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
+    viewers: 176200,
+    channels: 195,
+    icon: "Music",
+    subcategories: ["Live Music", "DJ", "Concerts", "Freestyle", "Music Production", "Instrumental", "Singing"]
   },
   {
-    id: "cat-8",
-    name: "High Stakes Racing & Sims",
-    slug: "racing-sims",
-    cover: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80",
-    viewers: 54100,
+    id: "cat-sports",
+    name: "Sports",
+    slug: "sports",
+    description: "Live sports analysis, watch parties, boxing, MMA scrims, football banter, and commentary.",
+    cover: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
+    viewers: 231000,
+    channels: 412,
+    icon: "Trophy",
+    subcategories: ["Football", "Basketball", "Boxing", "MMA", "Tennis", "Athletics", "Sports Talk"]
+  },
+  {
+    id: "cat-technology",
+    name: "Technology",
+    slug: "technology",
+    description: "Software engineering, live coding, AI model building, gadgets, cybersecurity, and startups.",
+    cover: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
+    viewers: 154100,
+    channels: 284,
+    icon: "Code2",
+    subcategories: ["Programming", "AI", "Software", "Gadgets", "Startups", "Cybersecurity", "Tech News"]
+  },
+  {
+    id: "cat-education",
+    name: "Education",
+    slug: "education",
+    description: "Interactive tutorials, math & science masterclasses, language learning, and career development.",
+    cover: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80",
+    viewers: 89300,
     channels: 140,
-    icon: "Car",
-    tags: ["Simulator", "F1", "Racing"]
+    icon: "BookOpen",
+    subcategories: ["Tutorials", "Courses", "Mathematics", "Science", "Languages", "Business", "Career Development"]
+  },
+  {
+    id: "cat-creative",
+    name: "Creative",
+    slug: "creative",
+    description: "Digital art, 3D modeling, Blender jams, photography editing, design systems, and animation.",
+    cover: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+    viewers: 92600,
+    channels: 164,
+    icon: "Palette",
+    subcategories: ["Digital Art", "Drawing", "Photography", "Design", "Animation", "3D", "DIY"]
+  },
+  {
+    id: "cat-lifestyle",
+    name: "Lifestyle",
+    slug: "lifestyle",
+    description: "Travel vlogs, live cooking shows, fitness workouts, fashion, beauty, and daily vlogs.",
+    cover: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80",
+    viewers: 112400,
+    channels: 230,
+    icon: "Smile",
+    subcategories: ["Travel", "Fitness", "Food", "Cooking", "Fashion", "Beauty", "Personal Lifestyle"]
+  },
+  {
+    id: "cat-talk",
+    name: "Talk & Discussion",
+    slug: "talk",
+    description: "Live Q&A, current event debates, community roundtables, advice panels, and philosophy.",
+    cover: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=600&q=80",
+    viewers: 165000,
+    channels: 290,
+    icon: "MessageSquare",
+    subcategories: ["Interviews", "Debates", "Current Events", "Community Discussions", "Q&A", "Advice"]
+  },
+  {
+    id: "cat-news",
+    name: "News",
+    slug: "news",
+    description: "Breaking global news broadcasts, political analysis, market trends, and world events.",
+    cover: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80",
+    viewers: 210500,
+    channels: 180,
+    icon: "Newspaper",
+    subcategories: ["Breaking News", "Politics", "Business News", "Technology News", "World News", "Local News"]
+  },
+  {
+    id: "cat-irl",
+    name: "IRL",
+    slug: "irl",
+    description: "In real life outdoor adventures, Tokyo nightwalks, event coverage, and city exploration.",
+    cover: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
+    viewers: 189300,
+    channels: 310,
+    icon: "MapPin",
+    subcategories: ["Travel", "Events", "City Tours", "Daily Life", "Outdoor", "Behind the Scenes"]
   }
 ];
 
@@ -123,14 +175,14 @@ export const CREATORS = [
   },
   {
     id: "cr-4",
-    username: "ApexPredator_JP",
-    displayName: "Apex Predator JP",
+    username: "TechPioneerPod",
+    displayName: "Tech Pioneer Podcast",
     verified: true,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-    banner: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
-    bio: "Top 10 Global Esports FPS Player. Fast reflexes, intense high-rank scrims & tournaments.",
-    followersCount: 890100,
-    subscribersCount: 23100,
+    avatar: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=300&q=80",
+    banner: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=80",
+    bio: "Weekly live podcast interviewing tech founders, AI researchers, and startup CEOs.",
+    followersCount: 540200,
+    subscribersCount: 18400,
     partnerTier: "ambassador",
     socials: { twitter: "https://twitter.com", youtube: "https://youtube.com" }
   },
@@ -154,7 +206,8 @@ export const LIVE_STREAMS = [
     id: "stream-101",
     title: "[WORLD RECORD ATTEMPT] Cyberpunk 2077 100% Deathless Speedrun - Hardcore Mode!",
     creator: CREATORS[0],
-    category: CATEGORIES[0],
+    category: CATEGORIES[0], // Gaming
+    subcategory: "RPG",
     viewerCount: 42890,
     startedAt: "2026-09-23T11:00:00Z",
     thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
@@ -162,13 +215,14 @@ export const LIVE_STREAMS = [
     tags: ["Speedrun", "English", "Hardcore", "No Death", "1080p60"],
     language: "English",
     isFeatured: true,
-    description: "Welcome to today's marathon speedrun attempt! We are aiming for a sub 3-hour 100% completion on maximum difficulty. Type !uptime or !rules in chat."
+    description: "Welcome to today's marathon speedrun attempt! We are aiming for a sub 3-hour 100% completion on maximum difficulty."
   },
   {
     id: "stream-102",
     title: "Building a Production Live Streaming App with React 19 & WebSockets Live!",
     creator: CREATORS[1],
-    category: CATEGORIES[1],
+    category: CATEGORIES[5], // Technology
+    subcategory: "Programming",
     viewerCount: 18420,
     startedAt: "2026-09-23T12:15:00Z",
     thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
@@ -176,13 +230,14 @@ export const LIVE_STREAMS = [
     tags: ["React", "Live Coding", "Fullstack", "WebSockets"],
     language: "English",
     isFeatured: true,
-    description: "In this live session we are architecting real-time video chat, custom state management, and responsive layouts. Ask your tech questions live in chat!"
+    description: "In this live session we are architecting real-time video chat, custom state management, and responsive layouts."
   },
   {
     id: "stream-103",
     title: "Friday Cyber-Synth DJ Night Live Visualizer Set | 140 BPM Hype",
     creator: CREATORS[2],
-    category: CATEGORIES[2],
+    category: CATEGORIES[3], // Music
+    subcategory: "DJ",
     viewerCount: 31050,
     startedAt: "2026-09-23T10:30:00Z",
     thumbnail: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
@@ -194,23 +249,25 @@ export const LIVE_STREAMS = [
   },
   {
     id: "stream-104",
-    title: "Apex Predator Season Finals | $100,000 Grand Championship Scrims",
+    title: "The Future of AI Agents & LLMs: Live Founder Panel & Q&A Session",
     creator: CREATORS[3],
-    category: CATEGORIES[3],
-    viewerCount: 64900,
+    category: CATEGORIES[2], // Podcasts
+    subcategory: "Technology",
+    viewerCount: 52400,
     startedAt: "2026-09-23T13:00:00Z",
-    thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
-    streamType: "game-fps",
-    tags: ["FPS", "Tournament", "Esports", "Japanese"],
-    language: "Japanese",
-    isFeatured: false,
-    description: "Global Esports tournament finals. High intensity comms and high IQ plays. Subscribe for custom emotes!"
+    thumbnail: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=800&q=80",
+    streamType: "synth-cyber",
+    tags: ["AI", "Podcast", "Interview", "Technology"],
+    language: "English",
+    isFeatured: true,
+    description: "Join us for a live panel featuring top AI founders discussing autonomous agents, local model inference, and future computing."
   },
   {
     id: "stream-105",
     title: "Midnight Shibuya Neon Rain Walk | 4K HDR Camera Live Walk & Talk",
     creator: CREATORS[4],
-    category: CATEGORIES[4],
+    category: CATEGORIES[11], // IRL
+    subcategory: "City Tours",
     viewerCount: 12400,
     startedAt: "2026-09-23T12:45:00Z",
     thumbnail: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80",
@@ -251,7 +308,7 @@ export const PAST_VODS = [
   },
   {
     id: "vod-3",
-    title: "Friday Synthwave Underground Underground Session",
+    title: "Friday Synthwave Underground Session",
     duration: "03:00:00",
     views: "142,800",
     recordedAt: "1 week ago",
