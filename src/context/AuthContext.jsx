@@ -12,12 +12,25 @@ export function AuthProvider({ children }) {
     role: "creator", // 'viewer' | 'creator' | 'moderator' | 'admin'
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
     banner: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
-    bio: "Passionate gamer, live coder, and founding community member of PRISM LIVE!",
+    bio: "Passionate streamer, live coder, and founding community member of PRISM LIVE!",
     isVerified: true,
+    memberSince: "September 2026",
     streamKey: "live_sk_prism_pioneer_9a8f7c6b5a4d3e2f",
     rtmpUrl: "rtmp://ingest.prismlive.io/live",
     followedCreatorIds: ["cr-1", "cr-2", "cr-3"],
-    subscriptions: ["cr-1"]
+    subscriptions: ["cr-1"],
+    favoriteCategories: ["podcasts", "technology", "music"],
+    onboardingCompleted: true,
+    twoFactorEnabled: false,
+    defaultQuality: "1080p60",
+    watchHistory: [
+      { id: "s1", title: "[WORLD RECORD] Cyberpunk 2077 Speedrun", creator: "NeonVortex", date: "Yesterday" },
+      { id: "s2", title: "Building an AI Code Assistant Live", creator: "Alex CodeCraft", date: "3 days ago" }
+    ],
+    transactionHistory: [
+      { id: "tx-101", type: "Tier 1 Subscription", amount: "$4.99", creator: "NeonVortex", date: "Sep 20, 2026" },
+      { id: "tx-102", type: "Cheer Bits Tip", amount: "$10.00", creator: "Aura Synth", date: "Sep 18, 2026" }
+    ]
   });
 
   const [notifications, setNotifications] = useState([
@@ -28,18 +41,20 @@ export function AuthProvider({ children }) {
 
   const followCreator = (creatorId) => {
     setUser(prev => {
-      const exists = prev.followedCreatorIds.includes(creatorId);
+      const followed = prev?.followedCreatorIds || [];
+      const exists = followed.includes(creatorId);
       const updated = exists
-        ? prev.followedCreatorIds.filter(id => id !== creatorId)
-        : [...prev.followedCreatorIds, creatorId];
+        ? followed.filter(id => id !== creatorId)
+        : [...followed, creatorId];
       return { ...prev, followedCreatorIds: updated };
     });
   };
 
   const subscribeToCreator = (creatorId) => {
     setUser(prev => {
-      if (prev.subscriptions.includes(creatorId)) return prev;
-      return { ...prev, subscriptions: [...prev.subscriptions, creatorId] };
+      const subs = prev?.subscriptions || [];
+      if (subs.includes(creatorId)) return prev;
+      return { ...prev, subscriptions: [...subs, creatorId] };
     });
   };
 
@@ -51,7 +66,7 @@ export function AuthProvider({ children }) {
     setUser(prev => ({
       ...prev,
       role: 'creator',
-      streamKey: `live_sk_prism_${prev.username.toLowerCase()}_` + Math.random().toString(36).substring(2, 10)
+      streamKey: `live_sk_prism_${(prev?.username || 'user').toLowerCase()}_` + Math.random().toString(36).substring(2, 10)
     }));
   };
 

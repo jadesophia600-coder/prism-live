@@ -15,6 +15,7 @@ import { WatchPage } from './pages/WatchPage';
 import { ChannelPage } from './pages/ChannelPage';
 import { CreatorDashboard } from './pages/CreatorDashboard';
 import { UserProfilePage } from './pages/UserProfilePage';
+import { UserDashboard } from './pages/UserDashboard';
 import { SearchPage } from './pages/SearchPage';
 import { AuthPages } from './pages/AuthPages';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -87,8 +88,11 @@ function AppContent() {
           {currentPage === 'dashboard' && (
             <CreatorDashboard onNavigate={handleNavigate} />
           )}
+          {currentPage === 'user-dashboard' && (
+            <UserDashboard onNavigate={handleNavigate} initialTab={pageParams.tab || 'overview'} />
+          )}
           {currentPage === 'profile' && (
-            <UserProfilePage onNavigate={handleNavigate} initialModal={pageParams.modal} />
+            <UserDashboard onNavigate={handleNavigate} initialTab={pageParams.tab || 'overview'} />
           )}
           {currentPage === 'search' && (
             <SearchPage

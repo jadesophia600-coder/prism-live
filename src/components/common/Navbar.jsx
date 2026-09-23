@@ -213,11 +213,11 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
 
                 <div className="py-2 space-y-1">
                   <button
-                    onClick={() => { setShowUserMenu(false); onNavigate('profile'); }}
+                    onClick={() => { setShowUserMenu(false); onNavigate('user-dashboard'); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
                   >
                     <User className="w-4 h-4 text-indigo-400" />
-                    My Profile
+                    User Dashboard
                   </button>
 
                   {user.role === 'creator' && (
