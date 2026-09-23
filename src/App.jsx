@@ -22,8 +22,11 @@ import { AdminDashboard } from './pages/AdminDashboard';
 
 import { LIVE_STREAMS } from './data/mockData';
 
+import { useAuth } from './context/AuthContext';
+
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState('discover');
+  const { user } = useAuth();
+  const [currentPage, setCurrentPage] = useState(!user?.onboardingCompleted ? 'auth' : 'discover');
   const [pageParams, setPageParams] = useState({});
   const [activeStream, setActiveStream] = useState(LIVE_STREAMS[0]);
 

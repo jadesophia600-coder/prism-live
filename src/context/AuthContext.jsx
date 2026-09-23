@@ -4,12 +4,13 @@ import { CREATORS } from '../data/mockData';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState({
     id: "usr-current-101",
     username: "PrismPioneer",
     displayName: "Prism Pioneer",
     email: "pioneer@prismlive.io",
-    role: "creator", // 'viewer' | 'creator' | 'moderator' | 'admin'
+    role: "viewer", // 'viewer' | 'creator' | 'moderator' | 'admin'
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
     banner: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
     bio: "Passionate streamer, live coder, and founding community member of PRISM LIVE!",
@@ -20,7 +21,7 @@ export function AuthProvider({ children }) {
     followedCreatorIds: ["cr-1", "cr-2", "cr-3"],
     subscriptions: ["cr-1"],
     favoriteCategories: ["podcasts", "technology", "music"],
-    onboardingCompleted: true,
+    onboardingCompleted: false,
     twoFactorEnabled: false,
     defaultQuality: "1080p60",
     watchHistory: [
@@ -74,10 +75,40 @@ export function AuthProvider({ children }) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
+  const registerUser = (profileData) => {
+    setUser(prev => ({
+      ...prev,
+      ...profileData,
+      onboardingCompleted: true
+    }));
+    setIsAuthenticated(true);
+  };
+
+  const signInUser = (email, password) => {
+    setIsAuthenticated(true);
+    setUser(prev => ({
+      ...prev,
+      onboardingCompleted: true
+    }));
+  };
+
+  const signOutUser = () => {
+    setIsAuthenticated(false);
+    setUser(prev => ({
+      ...prev,
+      onboardingCompleted: false
+    }));
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
       setUser,
+      isAuthenticated,
+      setIsAuthenticated,
+      registerUser,
+      signInUser,
+      signOutUser,
       followCreator,
       subscribeToCreator,
       switchRole,

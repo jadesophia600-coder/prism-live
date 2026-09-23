@@ -187,19 +187,28 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
             )}
           </div>
 
-          {/* User Profile Menu */}
-          <div className="relative">
+          {/* User Profile Menu or Sign In Gate Button */}
+          {!user?.onboardingCompleted ? (
             <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-800/60 transition-colors"
+              onClick={() => onNavigate('auth')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/30 hover:scale-105 transition-all"
             >
-              <img
-                src={user.avatar}
-                alt={user.displayName}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/40"
-              />
-              <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+              <User className="w-4 h-4" />
+              Sign In / Setup Profile
             </button>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-800/60 transition-colors"
+              >
+                <img
+                  src={user?.avatar}
+                  alt={user?.displayName || 'User'}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/40"
+                />
+                <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+              </button>
 
             {showUserMenu && (
               <div className="absolute right-0 mt-3 w-64 glass-panel bg-slate-900/95 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
@@ -256,6 +265,7 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
               </div>
             )}
           </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button
