@@ -132,11 +132,17 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
 
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
               <div className="relative">
-                <img
-                  src={user?.avatar}
-                  alt={user?.displayName}
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-indigo-500/40 shadow-2xl"
-                />
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user?.displayName || 'User'}
+                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-indigo-500/40 shadow-2xl"
+                  />
+                ) : (
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-indigo-600/30 border-2 border-indigo-500 flex items-center justify-center text-indigo-200 font-black text-2xl">
+                    {(user?.displayName || 'User').substring(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <span className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] uppercase border border-slate-900">
                   Online
                 </span>

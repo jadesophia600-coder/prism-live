@@ -10,8 +10,8 @@ const INITIAL_GUEST_USER = {
   username: "",
   displayName: "",
   email: "",
-  role: "viewer", // 'viewer' | 'creator' | 'moderator' | 'admin'
-  avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+  role: "creator", // Default role for new users
+  avatar: "",
   banner: "",
   bio: "",
   isVerified: false,
