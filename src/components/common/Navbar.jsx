@@ -102,43 +102,15 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
         {/* Right Controls */}
         <div className="flex items-center gap-3">
           
-          {/* Quick Role Switcher Pill */}
-          <div className="hidden lg:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs">
-            <span className="text-slate-500 px-2 font-medium">Role:</span>
-            {['viewer', 'creator', 'admin'].map((role) => (
-              <button
-                key={role}
-                onClick={() => {
-                  switchRole(role);
-                  addToast(`Switched user role to ${role.toUpperCase()}`, 'info');
-                }}
-                className={`px-2.5 py-1 rounded-md font-semibold capitalize transition-all ${
-                  user.role === role
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
-
-          {/* Go Live / Creator Studio Button */}
-          {user.role === 'creator' || user.role === 'admin' ? (
+          {/* Go Live Button for Signed-In Creators */}
+          {user?.onboardingCompleted && (
             <button
-              onClick={() => onNavigate('dashboard')}
-              className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-sm px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-105"
+              onClick={() => onNavigate('dashboard', { autoStartCamera: true })}
+              className="flex items-center gap-2.5 bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-extrabold text-sm px-5 py-2 rounded-xl shadow-lg shadow-rose-600/30 transition-all hover:scale-105 group"
+              title="Start Live Camera Broadcast"
             >
-              <Radio className="w-4 h-4 text-rose-300 animate-pulse" />
-              Creator Studio
-            </button>
-          ) : (
-            <button
-              onClick={() => onNavigate('profile', { modal: 'upgrade' })}
-              className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-semibold text-sm px-4 py-2 rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-105"
-            >
-              <Sparkles className="w-4 h-4 text-emerald-200" />
-              Start Streaming
+              <Radio className="w-4 h-4 text-white animate-pulse group-hover:scale-110 transition-transform" />
+              <span>Go Live</span>
             </button>
           )}
 
@@ -229,25 +201,13 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
                     User Dashboard
                   </button>
 
-                  {user.role === 'creator' && (
-                    <button
-                      onClick={() => { setShowUserMenu(false); onNavigate('dashboard'); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
-                    >
-                      <Radio className="w-4 h-4 text-emerald-400" />
-                      Creator Control Center
-                    </button>
-                  )}
-
-                  {user.role === 'admin' && (
-                    <button
-                      onClick={() => { setShowUserMenu(false); onNavigate('admin'); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/10 rounded-lg transition-colors"
-                    >
-                      <Shield className="w-4 h-4 text-amber-400" />
-                      Admin Control Panel
-                    </button>
-                  )}
+                  <button
+                    onClick={() => { setShowUserMenu(false); onNavigate('dashboard'); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
+                  >
+                    <Radio className="w-4 h-4 text-rose-400" />
+                    Creator Studio
+                  </button>
                 </div>
 
                 <div className="pt-2 border-t border-slate-800">

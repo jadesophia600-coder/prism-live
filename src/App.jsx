@@ -100,7 +100,7 @@ function AppContent() {
             />
           )}
           {currentPage === 'dashboard' && (
-            <CreatorDashboard onNavigate={handleNavigate} />
+            <CreatorDashboard onNavigate={handleNavigate} autoStartCamera={pageParams.autoStartCamera} />
           )}
           {currentPage === 'user-dashboard' && (
             <UserDashboard onNavigate={handleNavigate} initialTab={pageParams.tab || 'overview'} />
