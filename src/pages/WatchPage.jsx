@@ -12,8 +12,9 @@ import { ClipCard } from '../components/cards/ClipCard';
 import { CLIPS } from '../data/mockData';
 import {
   Heart, Star, Coins, Share2, CheckCircle, Eye, Users,
-  Sparkles, Radio, MessageSquare, ChevronDown, Flag
+  Sparkles, Radio, MessageSquare, ChevronDown, Flag, Scissors
 } from 'lucide-react';
+import { Modal } from '../components/common/Modal';
 
 export function WatchPage({ onNavigate, stream }) {
   const { user, followCreator } = useAuth();
@@ -23,6 +24,8 @@ export function WatchPage({ onNavigate, stream }) {
   const [showSubModal, setShowSubModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showClipModal, setShowClipModal] = useState(false);
+  const [clipTitle, setClipTitle] = useState(`${stream?.title || 'Live Stream'} - Highlight Clip`);
   const [showDetails, setShowDetails] = useState(true);
 
   const isFollowing = (user?.followedCreatorIds || []).includes(stream?.creator?.id);
@@ -119,6 +122,13 @@ export function WatchPage({ onNavigate, stream }) {
                     </button>
 
                     <button
+                      onClick={() => setShowClipModal(true)}
+                      className="px-3.5 py-2.5 rounded-xl bg-pink-500/20 text-pink-300 hover:bg-pink-500/30 border border-pink-500/40 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                    >
+                      <Scissors className="w-4 h-4" /> Clip 30s
+                    </button>
+
+                    <button
                       onClick={() => setShowTipModal(true)}
                       className="px-3.5 py-2.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-colors"
                     >
@@ -135,6 +145,38 @@ export function WatchPage({ onNavigate, stream }) {
                   </div>
 
                 </div>
+
+                {/* Clip Stream Modal */}
+                <Modal isOpen={showClipModal} onClose={() => setShowClipModal(false)} title="Create Highlight Clip (30s)">
+                  <div className="space-y-4 p-1">
+                    <div className="aspect-video rounded-xl bg-slate-950 border border-slate-800 overflow-hidden relative group">
+                      <img src={stream?.thumbnail} alt="" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-pink-600 font-mono font-bold text-[10px] text-white">
+                        0:00 - 0:30
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 mb-1 block">Clip Title</label>
+                      <input
+                        type="text"
+                        value={clipTitle}
+                        onChange={(e) => setClipTitle(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-pink-500 font-bold"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        addToast(`🎉 Highlight Clip created & copied to clipboard!`, 'success');
+                        setShowClipModal(false);
+                      }}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-600 to-rose-500 text-white font-black text-xs shadow-lg shadow-pink-600/30 hover:scale-102 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Scissors className="w-4 h-4" /> Publish Highlight Clip
+                    </button>
+                  </div>
+                </Modal>
 
                 {/* Tags & Collapsible Description */}
                 <div className="pt-3 border-t border-slate-800/80 space-y-3">
