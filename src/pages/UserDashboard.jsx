@@ -213,7 +213,7 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400">Prism Token Balance</p>
-                <p className="text-xl font-black text-white">{claimedBonus ? '1,350' : '1,250'} <span className="text-xs text-amber-400 font-normal font-mono">PTS</span></p>
+                <p className="text-xl font-black text-white">{claimedBonus ? (user?.tokens || 0) + 100 : (user?.tokens || 0)} <span className="text-xs text-amber-400 font-normal font-mono">PTS</span></p>
               </div>
             </div>
 
@@ -233,7 +233,7 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400">Watch Time This Month</p>
-                <p className="text-xl font-black text-white">24.5 hrs</p>
+                <p className="text-xl font-black text-white">{user?.watchTimeHrs || 0} hrs</p>
               </div>
             </div>
           </div>
@@ -329,38 +329,40 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                   <Zap className="w-5 h-5 text-indigo-400" /> Recommended Live Streams For You
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {recommendedStreams.map(stream => (
-                    <div
-                      key={stream.id}
-                      onClick={() => onNavigate('watch', { streamId: stream.id })}
-                      className="glass-panel group p-3 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 cursor-pointer transition-all space-y-3"
-                    >
-                      <div className="relative rounded-xl overflow-hidden aspect-video bg-slate-950">
-                        <img src={stream.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" /> LIVE
-                        </span>
-                        <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-slate-950/80 text-slate-200 font-mono text-[10px] font-bold">
-                          {(stream.viewerCount / 1000).toFixed(1)}k viewers
-                        </span>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        <img src={stream.creatorAvatar} alt="" className="w-9 h-9 rounded-full object-cover" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-extrabold text-white truncate group-hover:text-indigo-400 transition-colors">
-                            {stream.title}
-                          </p>
-                          <p className="text-[11px] text-slate-400 font-medium truncate">{stream.creatorName}</p>
-                          <span className="inline-block px-2 py-0.5 mt-1 rounded-md bg-slate-800 text-[10px] text-cyan-400 font-bold">
-                            {typeof stream.category === 'object' ? stream.category?.name : (stream.category || 'General')}
+                {recommendedStreams.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {recommendedStreams.map(stream => (
+                      <div
+                        key={stream.id}
+                        onClick={() => onNavigate('watch', { streamId: stream.id })}
+                        className="glass-panel group p-3 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 cursor-pointer transition-all space-y-3"
+                      >
+                        <div className="relative rounded-xl overflow-hidden aspect-video bg-slate-950">
+                          <img src={stream.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" /> LIVE
                           </span>
                         </div>
+
+                        <div className="flex items-start gap-3">
+                          <img src={stream.creator?.avatar} alt="" className="w-9 h-9 rounded-full object-cover" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-extrabold text-white truncate group-hover:text-indigo-400 transition-colors">
+                              {stream.title}
+                            </p>
+                            <p className="text-[11px] text-slate-400 font-medium truncate">{stream.creator?.displayName}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-2">
+                    <Radio className="w-8 h-8 text-slate-600 mx-auto" />
+                    <p className="text-xs font-bold text-white">No active live streams currently broadcasting</p>
+                    <p className="text-[11px] text-slate-400">Start your own live broadcast or explore categories!</p>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -372,7 +374,7 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black text-white flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-rose-500 fill-rose-500/20" /> Followed Channels
+                    <Heart className="w-5 h-5 text-rose-500 fill-rose-500/20" /> Followed Channels ({followedCreators.length})
                   </h2>
                   <p className="text-xs text-slate-400">Manage your notifications and quick jump to broadcasts</p>
                 </div>
@@ -384,47 +386,60 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {followedCreators.map(cr => (
-                  <div
-                    key={cr.id}
-                    className="glass-panel p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="flex items-center gap-4">
-                      <img src={cr.avatar} alt="" className="w-14 h-14 rounded-2xl object-cover ring-2 ring-indigo-500/30" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm font-black text-white truncate">{cr.displayName}</p>
-                          {cr.isVerified && <CheckCircle className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />}
+              {followedCreators.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {followedCreators.map(cr => (
+                    <div
+                      key={cr.id}
+                      className="glass-panel p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between space-y-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img src={cr.avatar} alt="" className="w-14 h-14 rounded-2xl object-cover ring-2 ring-indigo-500/30" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-black text-white truncate">{cr.displayName}</p>
+                            {cr.isVerified && <CheckCircle className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />}
+                          </div>
+                          <p className="text-xs text-indigo-400 font-mono">@{cr.username}</p>
                         </div>
-                        <p className="text-xs text-indigo-400 font-mono">@{cr.username}</p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">{(cr.followersCount / 1000).toFixed(1)}k Followers</p>
+                      </div>
+
+                      <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">{cr.bio}</p>
+
+                      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => onNavigate('channel', { username: cr.username })}
+                          className="flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 transition-colors flex items-center justify-center gap-1"
+                        >
+                          Visit Channel
+                        </button>
+                        <button
+                          onClick={() => {
+                            followCreator(cr.id);
+                            addToast(`Unfollowed @${cr.username}`, 'info');
+                          }}
+                          className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:bg-rose-500/10 font-bold text-xs transition-colors"
+                          title="Unfollow"
+                        >
+                          Unfollow
+                        </button>
                       </div>
                     </div>
-
-                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">{cr.bio}</p>
-
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => onNavigate('channel', { username: cr.username })}
-                        className="flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 transition-colors flex items-center justify-center gap-1"
-                      >
-                        Visit Channel
-                      </button>
-                      <button
-                        onClick={() => {
-                          followCreator(cr.id);
-                          addToast(`Unfollowed @${cr.username}`, 'info');
-                        }}
-                        className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:bg-rose-500/10 font-bold text-xs transition-colors"
-                        title="Unfollow"
-                      >
-                        Unfollow
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-3">
+                  <Heart className="w-10 h-10 text-slate-600 mx-auto" />
+                  <p className="text-sm font-bold text-white">No Followed Channels Yet</p>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">Explore content categories to find and follow creators on PRISM LIVE.</p>
+                  <button
+                    onClick={() => onNavigate('browse')}
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-lg inline-block"
+                  >
+                    Browse Categories
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -433,36 +448,37 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="space-y-4">
                 <h2 className="text-xl font-black text-white flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-400 fill-amber-400/20" /> Active Creator Subscriptions
+                  <Star className="w-5 h-5 text-amber-400 fill-amber-400/20" /> Active Creator Subscriptions ({(user?.subscriptions || []).length})
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {CREATORS.slice(0, 1).map(cr => (
-                    <div key={cr.id} className="glass-panel p-6 rounded-3xl bg-slate-900/90 border border-indigo-500/30 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={cr.avatar} alt="" className="w-12 h-12 rounded-2xl object-cover" />
-                          <div>
-                            <p className="text-sm font-black text-white">{cr.displayName}</p>
-                            <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold">
-                              Tier 1 Subscriber ($4.99/mo)
-                            </span>
+                {(user?.subscriptions || []).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {user.subscriptions.map(sub => (
+                      <div key={sub.id || Math.random()} className="glass-panel p-6 rounded-3xl bg-slate-900/90 border border-indigo-500/30 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img src={sub.avatar} alt="" className="w-12 h-12 rounded-2xl object-cover" />
+                            <div>
+                              <p className="text-sm font-black text-white">{sub.displayName}</p>
+                              <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold">
+                                Tier 1 Subscriber
+                              </span>
+                            </div>
                           </div>
+                          <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
+                            Active
+                          </span>
                         </div>
-                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
-                          Active
-                        </span>
                       </div>
-
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
-                        <p className="font-bold text-white mb-1">Subscriber Perks Unlocked:</p>
-                        <p>✓ Ad-Free Viewing on @{cr.username} Stream</p>
-                        <p>✓ 12 Exclusive Channel Chat Emotes</p>
-                        <p>✓ Custom Sub Badge next to your username in Chat</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-3">
+                    <Star className="w-10 h-10 text-slate-600 mx-auto" />
+                    <p className="text-sm font-bold text-white">No Active Channel Subscriptions</p>
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto">Subscribe to creators to unlock subscriber badges, custom chat emotes, and ad-free viewing.</p>
+                  </div>
+                )}
               </div>
 
               {/* Tipping & Bit History Table */}
@@ -483,15 +499,23 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
-                      {transactionHistory.map(tx => (
-                        <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="p-4 font-mono text-cyan-400 font-bold">{tx.id}</td>
-                          <td className="p-4 font-semibold text-white">{tx.type}</td>
-                          <td className="p-4 font-medium text-slate-300">@{tx.creator}</td>
-                          <td className="p-4 font-black text-emerald-400">{tx.amount}</td>
-                          <td className="p-4 text-slate-400">{tx.date}</td>
+                      {transactionHistory.length > 0 ? (
+                        transactionHistory.map(tx => (
+                          <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
+                            <td className="p-4 font-mono text-cyan-400 font-bold">{tx.id}</td>
+                            <td className="p-4 font-semibold text-white">{tx.type}</td>
+                            <td className="p-4 font-medium text-slate-300">@{tx.creator}</td>
+                            <td className="p-4 font-black text-emerald-400">{tx.amount}</td>
+                            <td className="p-4 text-slate-400">{tx.date}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-slate-500 text-xs">
+                            No token transactions or tipping history logged yet.
+                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -506,31 +530,39 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                 <Clock className="w-5 h-5 text-indigo-400" /> Recently Watched Broadcasts
               </h2>
 
-              <div className="space-y-3">
-                {watchHistory.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="glass-panel p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 flex items-center justify-between gap-4 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
-                        <Play className="w-5 h-5 fill-indigo-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-white">{item.title}</p>
-                        <p className="text-xs text-slate-400">Creator: <span className="text-cyan-400 font-semibold">@{item.creator}</span> • Watched {item.date}</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => onNavigate('discover')}
-                      className="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 transition-colors"
+              {watchHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {watchHistory.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="glass-panel p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 flex items-center justify-between gap-4 transition-all"
                     >
-                      Rewatch
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                          <Play className="w-5 h-5 fill-indigo-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">{item.title}</p>
+                          <p className="text-xs text-slate-400">Creator: <span className="text-cyan-400 font-semibold">@{item.creator}</span> • Watched {item.date}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => onNavigate('discover')}
+                        className="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 transition-colors"
+                      >
+                        Rewatch
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-3">
+                  <Clock className="w-10 h-10 text-slate-600 mx-auto" />
+                  <p className="text-sm font-bold text-white">No Watch History</p>
+                  <p className="text-xs text-slate-400">Broadcast streams you watch will be saved to your watch history.</p>
+                </div>
+              )}
             </div>
           )}
 
