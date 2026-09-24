@@ -28,6 +28,37 @@ export function WatchPage({ onNavigate, stream }) {
   const [clipTitle, setClipTitle] = useState(`${stream?.title || 'Live Stream'} - Highlight Clip`);
   const [showDetails, setShowDetails] = useState(true);
 
+  if (!stream || !stream.creator) {
+    return (
+      <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans">
+        <div className="flex flex-1">
+          <Sidebar onNavigate={onNavigate} currentPage="watch" />
+          <main className="flex-1 p-8 max-w-[1920px] mx-auto text-center space-y-6 flex flex-col items-center justify-center">
+            <Radio className="w-16 h-16 text-rose-500 animate-pulse" />
+            <h2 className="text-2xl font-black text-white">No Live Stream Selected</h2>
+            <p className="text-xs text-slate-400 max-w-md">
+              There are currently no active live streams broadcasting on this channel. Explore categories or start your own live stream!
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => onNavigate('discover')}
+                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-lg"
+              >
+                Back to Home
+              </button>
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-lg"
+              >
+                Go Live Now
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   const isFollowing = (user?.followedCreatorIds || []).includes(stream?.creator?.id);
   const isSubscribed = (user?.subscriptions || []).includes(stream?.creator?.id);
 

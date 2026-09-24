@@ -1,9 +1,10 @@
 import React from 'react';
-import { Eye, Radio } from 'lucide-react';
+import { Tag, Radio } from 'lucide-react';
 
 export function CategoryCard({ category, onSelectCategory }) {
   if (!category) return null;
   const tagsList = category.subcategories || category.tags || [];
+  const liveCount = category.liveCount !== undefined ? category.liveCount : 0;
 
   return (
     <div
@@ -16,30 +17,23 @@ export function CategoryCard({ category, onSelectCategory }) {
           alt={category.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-90" />
 
-        {/* Live Channel count pill */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-950/85 text-cyan-400 font-mono font-bold text-xs backdrop-blur-md border border-cyan-500/30">
-          <Radio className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-          {category.channels || 0} Live
+        {/* Live Status indicator */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/85 text-cyan-400 font-mono font-bold text-xs backdrop-blur-md border border-cyan-500/30">
+          <Radio className={`w-3.5 h-3.5 ${liveCount > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-500'}`} />
+          {liveCount > 0 ? `${liveCount} Live` : 'Category'}
         </div>
 
         {/* Content */}
-        <div className="absolute bottom-4 left-4 right-4 space-y-1.5">
+        <div className="absolute bottom-4 left-4 right-4 space-y-2">
           <h3 className="text-base font-extrabold text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
             {category.name}
           </h3>
-          
-          <div className="flex items-center gap-3 text-xs text-slate-300 font-medium">
-            <span className="flex items-center gap-1 font-mono text-indigo-300">
-              <Eye className="w-3.5 h-3.5 text-indigo-400" />
-              {category.viewers ? (category.viewers / 1000).toFixed(1) : 0}k Viewers
-            </span>
-          </div>
 
-          <div className="flex flex-wrap gap-1 pt-1">
+          <div className="flex flex-wrap gap-1">
             {tagsList.slice(0, 3).map((t, idx) => (
-              <span key={idx} className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700/60">
+              <span key={idx} className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-900/90 text-slate-300 border border-slate-700/60">
                 {t}
               </span>
             ))}

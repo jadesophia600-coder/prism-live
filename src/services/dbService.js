@@ -1,11 +1,13 @@
 import { supabase } from "../lib/supabaseClient";
-import { LIVE_STREAMS, CATEGORIES, CREATORS, PAST_VODS, CLIPS } from "../data/mockData";
+import { CATEGORIES } from "../data/mockData";
 
-// Real Categories seed definition (12 standard platform categories)
+// Active user published live streams held in runtime memory if offline from Supabase
+let runtimeActiveStreams = [];
+
 export const REAL_CATEGORIES = CATEGORIES;
 
 export class DBService {
-  // Fetch live streams from Supabase with fallback to rich live platform streams
+  // Fetch live streams from Supabase
   static async getLiveStreamsAsync(filters = {}) {
     try {
       let query = supabase.from('streams').select('*, profiles(*), categories(*)');
@@ -15,11 +17,12 @@ export class DBService {
       }
 
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
-        return data.map(s => this.formatStreamObject(s));
+      if (!error && data) {
+        const formatted = data.map(s => this.formatStreamObject(s));
+        return formatted;
       }
     } catch (e) {
-      console.warn("Supabase fetch live streams fallback:", e);
+      console.warn("Supabase fetch live streams:", e);
     }
     return this.getLiveStreams(filters);
   }
@@ -29,37 +32,37 @@ export class DBService {
     if (!s) return null;
     return {
       id: s.id || `stream-${Math.random()}`,
-      title: s.title || "Live Stream Broadcast",
+      title: s.title || "Live Broadcast",
       description: s.description || "",
-      thumbnail: s.thumbnail || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
-      viewerCount: s.viewer_count || s.viewerCount || 1250,
+      thumbnail: s.thumbnail || "",
+      viewerCount: s.viewer_count || s.viewerCount || 1,
       isLive: s.is_live !== undefined ? s.is_live : true,
       startedAt: s.created_at || s.startedAt || new Date().toISOString(),
       language: s.language || "English",
-      tags: s.tags || ["Live", "Broadcaster"],
-      subcategory: s.subcategory || "Technology",
+      tags: s.tags || ["Live"],
+      subcategory: s.subcategory || "",
       streamKey: s.stream_key || "",
-      rtmpUrl: s.rtmp_url || "rtmp://ingest.prismlive.io/live",
+      rtmpUrl: s.rtmp_url || "rtmp://live.prism.tv/live",
       creator: {
-        id: s.profiles?.id || s.creator_id || "cr-1",
-        displayName: s.profiles?.display_name || s.creator?.displayName || "NeonVortex",
-        username: s.profiles?.username || s.creator?.username || "NeonVortex",
-        avatar: s.profiles?.avatar_url || s.creator?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
-        bio: s.profiles?.bio || "Broadcaster on PRISM LIVE",
-        verified: true,
-        followersCount: 42900
+        id: s.profiles?.id || s.creator_id || "creator-1",
+        displayName: s.profiles?.display_name || s.creator?.displayName || "Broadcaster",
+        username: s.profiles?.username || s.creator?.username || "creator",
+        avatar: s.profiles?.avatar_url || s.creator?.avatar || "",
+        bio: s.profiles?.bio || "Creator on PRISM LIVE",
+        verified: false,
+        followersCount: 0
       },
       category: {
         id: s.categories?.id || "cat-1",
-        name: s.categories?.name || s.category_name || "Gaming",
-        slug: s.categories?.slug || s.category_slug || "gaming"
+        name: s.categories?.name || s.category_name || "General",
+        slug: s.categories?.slug || s.category_slug || "general"
       }
     };
   }
 
   // Synchronous stream getter returning active live streams
   static getLiveStreams(filters = {}) {
-    let streams = [...LIVE_STREAMS];
+    let streams = [...runtimeActiveStreams];
 
     if (filters.categorySlug && filters.categorySlug !== 'all') {
       streams = streams.filter(s => s.category && s.category.slug === filters.categorySlug);
@@ -99,6 +102,25 @@ export class DBService {
   }
 
   static async createStreamAsync(streamData) {
+    const newStream = {
+      id: `stream-${Date.now()}`,
+      title: streamData.title || "Live Stream Broadcast",
+      description: streamData.description || "",
+      category_slug: streamData.categorySlug || 'gaming',
+      category_name: CATEGORIES.find(c => c.slug === streamData.categorySlug)?.name || 'Gaming',
+      subcategory: streamData.subcategory || '',
+      language: streamData.language || 'English',
+      tags: streamData.tags || ['Live'],
+      is_live: true,
+      viewer_count: 1,
+      stream_key: streamData.streamKey || 'live_sk_prism',
+      created_at: new Date().toISOString()
+    };
+
+    // Add to runtime memory
+    const formatted = this.formatStreamObject(newStream);
+    runtimeActiveStreams = [formatted, ...runtimeActiveStreams];
+
     try {
       const { data, error } = await supabase
         .from('streams')
@@ -111,8 +133,7 @@ export class DBService {
           tags: streamData.tags || [],
           is_live: true,
           viewer_count: 1,
-          stream_key: streamData.streamKey,
-          thumbnail: streamData.thumbnail || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+          stream_key: streamData.streamKey
         }])
         .select();
 
@@ -122,26 +143,21 @@ export class DBService {
     } catch (e) {
       console.warn("Error publishing stream to Supabase:", e);
     }
-    return null;
+    return newStream;
   }
 
   static searchAll(query) {
     if (!query) return { streams: [], creators: [], categories: [], clips: [] };
 
     const q = query.toString().toLowerCase();
-    const streams = LIVE_STREAMS.filter(s =>
+    const streams = runtimeActiveStreams.filter(s =>
       (s.title && s.title.toLowerCase().includes(q)) ||
       (s.category && s.category.name && s.category.name.toLowerCase().includes(q))
-    );
-    const creators = CREATORS.filter(c =>
-      (c.displayName && c.displayName.toLowerCase().includes(q)) ||
-      (c.username && c.username.toLowerCase().includes(q))
     );
     const categories = CATEGORIES.filter(cat =>
       (cat.name && cat.name.toLowerCase().includes(q))
     );
-    const clips = CLIPS.filter(cl => cl.title && cl.title.toLowerCase().includes(q));
 
-    return { streams, creators, categories, clips };
+    return { streams, creators: [], categories, clips: [] };
   }
 }
