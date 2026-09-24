@@ -25,12 +25,23 @@ import { LIVE_STREAMS } from './data/mockData';
 import { useAuth } from './context/AuthContext';
 
 function AppContent() {
-  const { user } = useAuth();
-  const [currentPage, setCurrentPage] = useState(!user?.onboardingCompleted ? 'auth' : 'discover');
+  const { user, isAuthenticated } = useAuth();
+  const [currentPage, setCurrentPage] = useState(!user?.onboardingCompleted ? 'auth' : 'user-dashboard');
   const [pageParams, setPageParams] = useState({});
-  const [activeStream, setActiveStream] = useState(LIVE_STREAMS[0]);
+  const [activeStream, setActiveStream] = useState(null);
+
+  // Enforce Sign In & Profile Setup Gateway for unauthenticated users
+  React.useEffect(() => {
+    if (!user?.onboardingCompleted || !isAuthenticated) {
+      setCurrentPage('auth');
+    }
+  }, [user?.onboardingCompleted, isAuthenticated]);
 
   const handleNavigate = (page, params = {}) => {
+    if (!user?.onboardingCompleted && page !== 'auth') {
+      setCurrentPage('auth');
+      return;
+    }
     setCurrentPage(page);
     setPageParams(params);
     window.scrollTo({ top: 0, behavior: 'smooth' });

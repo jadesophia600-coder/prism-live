@@ -1,63 +1,56 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { CREATORS } from '../data/mockData';
 
 const AuthContext = createContext();
 
-const LOCAL_STORAGE_KEY = 'prismlive_user_session_v2';
+const LOCAL_STORAGE_KEY = 'prismlive_user_session_v3';
 
-const DEFAULT_USER = {
-  id: "usr-live-101",
-  username: "PrismPioneer",
-  displayName: "Prism Pioneer",
-  email: "pioneer@prismlive.io",
+const INITIAL_GUEST_USER = {
+  id: "",
+  username: "",
+  displayName: "",
+  email: "",
   role: "viewer", // 'viewer' | 'creator' | 'moderator' | 'admin'
   avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
-  banner: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
-  bio: "Passionate streamer, live coder, and founding community member of PRISM LIVE!",
-  isVerified: true,
+  banner: "",
+  bio: "",
+  isVerified: false,
   memberSince: "September 2026",
-  streamKey: "live_sk_prism_pioneer_9a8f7c6b5a4d3e2f",
+  streamKey: "",
   rtmpUrl: "rtmp://ingest.prismlive.io/live",
-  followedCreatorIds: ["cr-1", "cr-2", "cr-3"],
-  subscriptions: ["cr-1"],
-  favoriteCategories: ["podcasts", "technology", "music"],
-  onboardingCompleted: true,
+  followedCreatorIds: [],
+  subscriptions: [],
+  favoriteCategories: [],
+  onboardingCompleted: false,
   twoFactorEnabled: false,
   defaultQuality: "1080p60",
-  watchHistory: [
-    { id: "s1", title: "[WORLD RECORD] Cyberpunk 2077 Speedrun", creator: "NeonVortex", date: "Yesterday" },
-    { id: "s2", title: "Building an AI Code Assistant Live", creator: "Alex CodeCraft", date: "3 days ago" }
-  ],
-  transactionHistory: [
-    { id: "tx-101", type: "Tier 1 Subscription", amount: "$4.99", creator: "NeonVortex", date: "Sep 20, 2026" },
-    { id: "tx-102", type: "Cheer Bits Tip", amount: "$10.00", creator: "Aura Synth", date: "Sep 18, 2026" }
-  ]
+  watchHistory: [],
+  transactionHistory: []
 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_USER;
+      return saved ? JSON.parse(saved) : INITIAL_GUEST_USER;
     } catch {
-      return DEFAULT_USER;
+      return INITIAL_GUEST_USER;
     }
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!(user && user.email && user.onboardingCompleted);
+  });
 
-  const [notifications, setNotifications] = useState([
-    { id: "n1", type: "stream_live", title: "NeonVortex went live!", message: "Cyberpunk 2077 Speedrun World Record Attempt", time: "10m ago", read: false },
-    { id: "n2", type: "new_sub", title: "New Subscriber!", message: "PixelQueen subscribed at Tier 1 ($4.99)", time: "1h ago", read: false },
-    { id: "n3", type: "system", title: "Platform Update 2.5", message: "PRISM LIVE Ultra-Low Latency engine active!", time: "1d ago", read: true }
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   // Persist user session to localStorage
   useEffect(() => {
     try {
-      if (user) {
+      if (user && user.onboardingCompleted) {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
       }
     } catch (e) {
       console.warn("Could not save user session:", e);
@@ -153,6 +146,8 @@ export function AuthProvider({ children }) {
     setUser(prev => ({
       ...prev,
       ...profileData,
+      id: prev.id || `usr-${Date.now()}`,
+      streamKey: `live_sk_prism_${(profileData.username || 'user').toLowerCase()}_` + Math.random().toString(36).substring(2, 8),
       onboardingCompleted: true
     }));
     setIsAuthenticated(true);
@@ -161,7 +156,18 @@ export function AuthProvider({ children }) {
   const signInUser = async (email, password) => {
     try {
       if (email && password) {
-        await supabase.auth.signInWithPassword({ email, password });
+        const { data } = await supabase.auth.signInWithPassword({ email, password });
+        if (data?.user) {
+          setUser(prev => ({
+            ...prev,
+            id: data.user.id,
+            email: data.user.email,
+            displayName: data.user.user_metadata?.display_name || email.split('@')[0],
+            username: data.user.user_metadata?.username || email.split('@')[0],
+            avatar: data.user.user_metadata?.avatar_url || prev.avatar,
+            onboardingCompleted: true
+          }));
+        }
       }
     } catch (e) {
       console.warn("Supabase auth sign in fallback:", e);
@@ -170,7 +176,9 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
     setUser(prev => ({
       ...prev,
-      email: email || prev.email,
+      email: email || prev.email || "user@prismlive.io",
+      displayName: prev.displayName || email?.split('@')[0] || "User",
+      username: prev.username || email?.split('@')[0] || "user",
       onboardingCompleted: true
     }));
   };
@@ -181,11 +189,9 @@ export function AuthProvider({ children }) {
     } catch (e) {
       console.warn("Supabase auth sign out:", e);
     }
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
     setIsAuthenticated(false);
-    setUser(prev => ({
-      ...prev,
-      onboardingCompleted: false
-    }));
+    setUser(INITIAL_GUEST_USER);
   };
 
   return (
