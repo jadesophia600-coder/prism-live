@@ -22,7 +22,7 @@ export function CreatorCard({ creator, onSelectCreator }) {
   return (
     <div
       onClick={() => onSelectCreator && onSelectCreator(creator)}
-      className="group relative flex flex-col items-center text-center p-6 rounded-3xl glass-panel bg-slate-900/60 border border-slate-800/80 cursor-pointer hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 transform hover:-translate-y-1"
+      className="group relative flex flex-col items-center text-center p-6 apple-card cursor-pointer shadow-xl transition-all"
     >
       {/* Banner Backdrop */}
       <div className="absolute top-0 left-0 right-0 h-20 bg-slate-950 rounded-t-3xl overflow-hidden opacity-60">
@@ -62,10 +62,10 @@ export function CreatorCard({ creator, onSelectCreator }) {
       {/* Follow CTA */}
       <button
         onClick={handleFollowToggle}
-        className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+        className={`w-full py-2.5 apple-pill-btn font-bold text-xs flex items-center justify-center gap-2 transition-all ${
           isFollowing
-            ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40'
-            : 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/30 hover:scale-102'
+            ? 'bg-slate-800/90 text-slate-300 border border-slate-700/80 hover:bg-rose-500/20 hover:text-rose-300'
+            : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-400 text-white shadow-lg shadow-indigo-600/30'
         }`}
       >
         <Heart className={`w-3.5 h-3.5 ${isFollowing ? 'fill-rose-500 text-rose-500' : ''}`} />

@@ -15,7 +15,7 @@ export function StreamCard({ stream, onSelectStream, onSelectCategory, onSelectC
     <>
       <div
         onClick={() => onSelectStream && onSelectStream(stream)}
-        className="group relative flex flex-col rounded-2xl glass-panel bg-slate-900/60 border border-slate-800/80 overflow-hidden cursor-pointer hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 transform hover:-translate-y-1"
+        className="group relative flex flex-col apple-card overflow-hidden cursor-pointer shadow-xl transition-all"
       >
         {/* Thumbnail Container */}
         <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
