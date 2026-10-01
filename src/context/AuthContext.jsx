@@ -89,23 +89,47 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const followCreator = (creatorId) => {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingFollowCreator, setPendingFollowCreator] = useState(null);
+
+  const openAuthModal = (creatorToFollow = null) => {
+    setPendingFollowCreator(creatorToFollow);
+    setAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setAuthModalOpen(false);
+    setPendingFollowCreator(null);
+  };
+
+  const followCreator = (creatorId, creatorObj = null) => {
+    if (!isAuthenticated) {
+      openAuthModal(creatorObj || (typeof creatorId === 'object' ? creatorId : { id: creatorId }));
+      return false;
+    }
+    const targetId = typeof creatorId === 'object' ? creatorId.id : creatorId;
     setUser(prev => {
       const followed = prev?.followedCreatorIds || [];
-      const exists = followed.includes(creatorId);
+      const exists = followed.includes(targetId);
       const updated = exists
-        ? followed.filter(id => id !== creatorId)
-        : [...followed, creatorId];
+        ? followed.filter(id => id !== targetId)
+        : [...followed, targetId];
       return { ...prev, followedCreatorIds: updated };
     });
+    return true;
   };
 
   const subscribeToCreator = (creatorId) => {
+    if (!isAuthenticated) {
+      openAuthModal();
+      return false;
+    }
     setUser(prev => {
       const subs = prev?.subscriptions || [];
       if (subs.includes(creatorId)) return prev;
       return { ...prev, subscriptions: [...subs, creatorId] };
     });
+    return true;
   };
 
   const switchRole = (newRole) => {
@@ -125,6 +149,7 @@ export function AuthProvider({ children }) {
   };
 
   const registerUser = async (profileData) => {
+    const autoFollowed = pendingFollowCreator;
     try {
       if (profileData.email && profileData.password) {
         await supabase.auth.signUp({
@@ -143,17 +168,28 @@ export function AuthProvider({ children }) {
       console.warn("Supabase auth registration fallback:", e);
     }
 
-    setUser(prev => ({
-      ...prev,
-      ...profileData,
-      id: prev.id || `usr-${Date.now()}`,
-      streamKey: `live_sk_prism_${(profileData.username || 'user').toLowerCase()}_` + Math.random().toString(36).substring(2, 8),
-      onboardingCompleted: true
-    }));
+    setUser(prev => {
+      const existingFollowed = prev?.followedCreatorIds || [];
+      const newFollowed = autoFollowed?.id && !existingFollowed.includes(autoFollowed.id)
+        ? [...existingFollowed, autoFollowed.id]
+        : existingFollowed;
+
+      return {
+        ...prev,
+        ...profileData,
+        id: prev.id || `usr-${Date.now()}`,
+        streamKey: `live_sk_prism_${(profileData.username || 'user').toLowerCase()}_` + Math.random().toString(36).substring(2, 8),
+        followedCreatorIds: newFollowed,
+        onboardingCompleted: true
+      };
+    });
     setIsAuthenticated(true);
+    closeAuthModal();
+    return { autoFollowed };
   };
 
   const signInUser = async (email, password) => {
+    const autoFollowed = pendingFollowCreator;
     try {
       if (email && password) {
         const { data } = await supabase.auth.signInWithPassword({ email, password });
@@ -174,13 +210,23 @@ export function AuthProvider({ children }) {
     }
 
     setIsAuthenticated(true);
-    setUser(prev => ({
-      ...prev,
-      email: email || prev.email || "user@prismlive.io",
-      displayName: prev.displayName || email?.split('@')[0] || "User",
-      username: prev.username || email?.split('@')[0] || "user",
-      onboardingCompleted: true
-    }));
+    setUser(prev => {
+      const existingFollowed = prev?.followedCreatorIds || [];
+      const newFollowed = autoFollowed?.id && !existingFollowed.includes(autoFollowed.id)
+        ? [...existingFollowed, autoFollowed.id]
+        : existingFollowed;
+
+      return {
+        ...prev,
+        email: email || prev.email || "user@prismlive.io",
+        displayName: prev.displayName || email?.split('@')[0] || "User",
+        username: prev.username || email?.split('@')[0] || "user",
+        followedCreatorIds: newFollowed,
+        onboardingCompleted: true
+      };
+    });
+    closeAuthModal();
+    return { autoFollowed };
   };
 
   const signOutUser = async () => {
@@ -200,6 +246,10 @@ export function AuthProvider({ children }) {
       setUser,
       isAuthenticated,
       setIsAuthenticated,
+      authModalOpen,
+      pendingFollowCreator,
+      openAuthModal,
+      closeAuthModal,
       registerUser,
       signInUser,
       signOutUser,

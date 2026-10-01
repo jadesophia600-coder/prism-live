@@ -415,8 +415,10 @@ export function UserDashboard({ onNavigate, initialTab = 'overview' }) {
                         </button>
                         <button
                           onClick={() => {
-                            followCreator(cr.id);
-                            addToast(`Unfollowed @${cr.username}`, 'info');
+                            const success = followCreator(cr.id, cr);
+                            if (success) {
+                              addToast(`Unfollowed @${cr.username}`, 'info');
+                            }
                           }}
                           className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:bg-rose-500/10 font-bold text-xs transition-colors"
                           title="Unfollow"

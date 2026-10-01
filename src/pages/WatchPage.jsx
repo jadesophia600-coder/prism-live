@@ -63,8 +63,10 @@ export function WatchPage({ onNavigate, stream }) {
   const isSubscribed = (user?.subscriptions || []).includes(stream?.creator?.id);
 
   const handleFollowToggle = () => {
-    followCreator(stream.creator.id);
-    addToast(isFollowing ? `Unfollowed @${stream.creator.username}` : `Following @${stream.creator.username}!`, isFollowing ? 'info' : 'success');
+    const success = followCreator(stream.creator.id, stream.creator);
+    if (success) {
+      addToast(isFollowing ? `Unfollowed @${stream.creator.username}` : `Following @${stream.creator.username}!`, isFollowing ? 'info' : 'success');
+    }
   };
 
   return (

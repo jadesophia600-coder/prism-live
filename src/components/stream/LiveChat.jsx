@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useStream } from '../../context/StreamContext';
 import { useToast } from '../../context/ToastContext';
 import { chatService } from '../../services/chatService';
+import { ShareModal } from './ShareModal';
 import {
   Send, Smile, ShieldAlert, Trash2, Clock, Ban,
   Sparkles, Lock, MessageSquare, ChevronDown, Share2, Users, Radio, Link, Check
@@ -17,6 +18,7 @@ export function LiveChat({ stream }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [activeModMenuMsgId, setActiveModMenuMsgId] = useState(null);
 
   const streamId = stream?.id || 'live-broadcaster';
@@ -81,20 +83,7 @@ export function LiveChat({ stream }) {
   };
 
   const handleShareStreamLink = () => {
-    const streamUrl = `${window.location.origin}/watch?streamId=${streamId}`;
-    navigator.clipboard.writeText(streamUrl);
-    setCopiedLink(true);
-
-    // Share link directly to live chat comment section
-    chatService.sendMessage(streamId, {
-      user: user?.displayName || 'Broadcaster',
-      badge: 'Broadcaster',
-      message: `🔗 Live Broadcast Link: ${streamUrl}`,
-      color: '#f59e0b'
-    });
-
-    addToast('Stream link copied to clipboard & posted to live chat comments!', 'success');
-    setTimeout(() => setCopiedLink(false), 3000);
+    setShowShareModal(true);
   };
 
   const handleEmojiClick = (emoji) => {
@@ -132,10 +121,10 @@ export function LiveChat({ stream }) {
         <button
           onClick={handleShareStreamLink}
           className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md transition-all hover:scale-105"
-          title="Share live stream link to comments"
+          title="Share stream to WhatsApp, contacts, and social media"
         >
-          {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Link className="w-3.5 h-3.5" />}
-          <span>{copiedLink ? 'Link Shared!' : 'Share Link'}</span>
+          <Share2 className="w-3.5 h-3.5" />
+          <span>Share Link</span>
         </button>
       </div>
 
@@ -278,6 +267,12 @@ export function LiveChat({ stream }) {
         </div>
       )}
 
+      {/* Share Stream Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        stream={stream}
+      />
     </div>
   );
 }

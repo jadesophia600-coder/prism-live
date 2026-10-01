@@ -22,8 +22,10 @@ export function ChannelPage({ onNavigate, onSelectStream, username }) {
   const isFollowing = (user?.followedCreatorIds || []).includes(creator?.id);
 
   const handleFollow = () => {
-    followCreator(creator.id);
-    addToast(isFollowing ? `Unfollowed @${creator.username}` : `Following @${creator.username}!`, isFollowing ? 'info' : 'success');
+    const success = followCreator(creator.id, creator);
+    if (success) {
+      addToast(isFollowing ? `Unfollowed @${creator.username}` : `Following @${creator.username}!`, isFollowing ? 'info' : 'success');
+    }
   };
 
   return (

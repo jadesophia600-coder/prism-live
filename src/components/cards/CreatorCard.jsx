@@ -4,7 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { CheckCircle, Heart, Users, Sparkles } from 'lucide-react';
 
 export function CreatorCard({ creator, onSelectCreator }) {
-  const { user, followCreator } = useAuth();
+  const { user, isAuthenticated, followCreator } = useAuth();
   const { addToast } = useToast();
 
   if (!creator) return null;
@@ -13,8 +13,10 @@ export function CreatorCard({ creator, onSelectCreator }) {
 
   const handleFollowToggle = (e) => {
     e.stopPropagation();
-    followCreator(creator.id);
-    addToast(isFollowing ? `Unfollowed @${creator.username}` : `Following @${creator.username}!`, isFollowing ? 'info' : 'success');
+    const success = followCreator(creator.id, creator);
+    if (success) {
+      addToast(isFollowing ? `Unfollowed @${creator.username}` : `Following @${creator.username}!`, isFollowing ? 'info' : 'success');
+    }
   };
 
   return (

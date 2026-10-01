@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { ShareModal } from '../stream/ShareModal';
 import {
   Zap, Search, Bell, Video, User, Shield, Radio,
   Compass, Grid, LogOut, ChevronDown, Check, Menu, X, Sparkles,
-  Home, Heart, Layers
+  Home, Heart, Layers, Share2
 } from 'lucide-react';
 
 export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
-  const { user, switchRole, notifications, markNotificationAsRead, signOutUser } = useAuth();
+  const { user, openAuthModal, switchRole, notifications, markNotificationAsRead, signOutUser } = useAuth();
   const { addToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -114,6 +116,16 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
             </button>
           )}
 
+          {/* Share Website Button */}
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-cyan-500/40 font-semibold text-xs transition-all shadow-md active:scale-95 group"
+            title="Share PRISM LIVE website link on WhatsApp, Twitter/X, and social media"
+          >
+            <Share2 className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
+            <span className="hidden sm:inline">Share</span>
+          </button>
+
           {/* Notifications */}
           <div className="relative">
             <button
@@ -162,7 +174,7 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
           {/* User Profile Menu or Sign In Gate Button */}
           {!user?.onboardingCompleted ? (
             <button
-              onClick={() => onNavigate('auth')}
+              onClick={() => openAuthModal()}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/30 hover:scale-105 transition-all"
             >
               <User className="w-4 h-4" />
@@ -267,8 +279,22 @@ export function Navbar({ onNavigate, currentPage, onOpenAuth }) {
           >
             <User className="w-5 h-5 text-indigo-400" /> Profile
           </button>
+          <button
+            onClick={() => { setMobileMenuOpen(false); setShowShareModal(true); }}
+            className="w-full flex items-center gap-3 py-2 text-cyan-400 font-bold"
+          >
+            <Share2 className="w-5 h-5 text-cyan-400" /> Share Website Link
+          </button>
         </div>
       )}
+
+      {/* Global Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title="PRISM LIVE - Next-Gen Creator & Streaming Platform"
+        customUrl={window.location.origin}
+      />
     </header>
   );
 }

@@ -54,7 +54,7 @@ export function AuthPages({ onNavigate }) {
       }
       signInUser(email, password);
       addToast("Welcome back to PRISM LIVE!", "success");
-      onNavigate(selectedRole === 'creator' ? 'dashboard' : 'user-dashboard');
+      onNavigate('discover');
       return;
     }
 
@@ -80,13 +80,8 @@ export function AuthPages({ onNavigate }) {
       onboardingCompleted: true
     });
 
-    if (selectedRole === 'creator') {
-      addToast("🚀 Creator Account Activated! Welcome to your Broadcasting Studio.", "success");
-      onNavigate('dashboard');
-    } else {
-      addToast("🎉 Account created! Welcome to your User Dashboard.", "success");
-      onNavigate('user-dashboard');
-    }
+    addToast("🎉 Welcome to PRISM LIVE! Discovering live streams.", "success");
+    onNavigate('discover');
   };
 
   return (

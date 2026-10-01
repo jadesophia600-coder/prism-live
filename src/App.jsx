@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { StreamProvider, useStream } from './context/StreamContext';
 import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/common/Toast';
 import { Navbar } from './components/common/Navbar';
+import { AuthModal } from './components/common/AuthModal';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 import { LandingPage } from './pages/LandingPage';
@@ -22,24 +23,16 @@ import { AdminDashboard } from './pages/AdminDashboard';
 
 import { LIVE_STREAMS } from './data/mockData';
 
-import { useAuth } from './context/AuthContext';
-
 function AppContent() {
-  const { user, isAuthenticated } = useAuth();
-  const [currentPage, setCurrentPage] = useState(!user?.onboardingCompleted ? 'auth' : 'user-dashboard');
+  const { user, isAuthenticated, openAuthModal } = useAuth();
+  const [currentPage, setCurrentPage] = useState('discover');
   const [pageParams, setPageParams] = useState({});
   const [activeStream, setActiveStream] = useState(null);
 
-  // Enforce Sign In & Profile Setup Gateway for unauthenticated users
-  React.useEffect(() => {
-    if (!user?.onboardingCompleted || !isAuthenticated) {
-      setCurrentPage('auth');
-    }
-  }, [user?.onboardingCompleted, isAuthenticated]);
-
   const handleNavigate = (page, params = {}) => {
-    if (!user?.onboardingCompleted && page !== 'auth') {
-      setCurrentPage('auth');
+    const protectedPages = ['dashboard', 'user-dashboard', 'profile'];
+    if (protectedPages.includes(page) && (!user?.onboardingCompleted || !isAuthenticated)) {
+      openAuthModal();
       return;
     }
     setCurrentPage(page);
@@ -59,7 +52,7 @@ function AppContent() {
         <Navbar
           onNavigate={handleNavigate}
           currentPage={currentPage}
-          onOpenAuth={() => handleNavigate('auth')}
+          onOpenAuth={openAuthModal}
         />
       )}
 
@@ -123,6 +116,9 @@ function AppContent() {
           )}
         </ErrorBoundary>
       </div>
+
+      {/* Interactive Account Auth & Follow Creator Modal */}
+      <AuthModal />
 
       {/* Global Toast Alerts */}
       <ToastContainer />
