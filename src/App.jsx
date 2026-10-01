@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/common/Toast';
 import { Navbar } from './components/common/Navbar';
 import { AuthModal } from './components/common/AuthModal';
+import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 import { LandingPage } from './pages/LandingPage';
@@ -46,7 +47,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white pb-16 md:pb-0">
       {/* Navbar Header */}
       {currentPage !== 'auth' && (
         <Navbar
@@ -116,6 +117,11 @@ function AppContent() {
           )}
         </ErrorBoundary>
       </div>
+
+      {/* Mobile Phone App Navigation Bar */}
+      {currentPage !== 'auth' && (
+        <MobileBottomNav onNavigate={handleNavigate} currentPage={currentPage} />
+      )}
 
       {/* Interactive Account Auth & Follow Creator Modal */}
       <AuthModal />
