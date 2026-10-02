@@ -74,6 +74,7 @@ export function AuthModal() {
 
     const res = await registerUser({
       email: email.trim(),
+      password: password.trim(),
       username: username.trim().replace(/^@/, ''),
       displayName: displayName.trim(),
       bio: selectedRole === 'creator' ? "Broadcasting live on PRISM LIVE!" : "PRISM LIVE stream enthusiast!",

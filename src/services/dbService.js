@@ -74,13 +74,56 @@ let runtimeCreators = (() => {
   return DEFAULT_CREATORS;
 })();
 
+const GLOBAL_CLOUD_INDEX_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0fc4b812b609d';
+
+// Helper to push profile to global cloud database across all devices
+async function syncProfileToGlobalCloud(creatorObj) {
+  try {
+    const res = await fetch(GLOBAL_CLOUD_INDEX_URL);
+    if (res.ok) {
+      const json = await res.json();
+      let creatorsList = json.data?.creators || [];
+      const idx = creatorsList.findIndex(c => c.username?.toLowerCase() === creatorObj.username?.toLowerCase());
+      if (idx >= 0) {
+        creatorsList[idx] = { ...creatorsList[idx], ...creatorObj };
+      } else {
+        creatorsList.unshift(creatorObj);
+      }
+      await fetch(GLOBAL_CLOUD_INDEX_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'PRISM_LIVE_GLOBAL_CREATOR_INDEX_V1',
+          data: { creators: creatorsList }
+        })
+      });
+    }
+  } catch (e) {
+    console.warn("Global cloud profile sync warning:", e);
+  }
+}
+
+// Helper to fetch all profiles from global cloud database across all devices
+async function fetchProfilesFromGlobalCloud() {
+  try {
+    const res = await fetch(GLOBAL_CLOUD_INDEX_URL);
+    if (res.ok) {
+      const json = await res.json();
+      return json.data?.creators || [];
+    }
+  } catch (e) {
+    console.warn("Global cloud profile fetch warning:", e);
+  }
+  return [];
+}
+
 // Active user published live streams held in runtime memory if offline from Supabase
 let runtimeActiveStreams = [];
 
 export const REAL_CATEGORIES = CATEGORIES;
 
 export class DBService {
-  // Save or update a creator profile in runtime memory and localStorage
+  // Save or update a creator profile in runtime memory, localStorage, and global cloud
   static registerOrUpdateCreator(profile) {
     if (!profile || (!profile.username && !profile.displayName && !profile.email)) return null;
 
@@ -118,22 +161,8 @@ export class DBService {
       console.warn("Could not persist creator registry:", e);
     }
 
-    try {
-      const supabasePayload = {
-        display_name: displayName,
-        username: username,
-        avatar_url: creatorObj.avatar,
-        bio: creatorObj.bio
-      };
-      if (profile.id && profile.id.length >= 30) {
-        supabasePayload.id = profile.id;
-      }
-      supabase.from('profiles').upsert(supabasePayload)
-        .then(() => {})
-        .catch(e => console.warn("Supabase profile upsert warning:", e));
-    } catch (e) {
-      // Ignore offline errors
-    }
+    // Trigger real-time global cloud sync across all phones & computers
+    syncProfileToGlobalCloud(creatorObj);
 
     return creatorObj;
   }
@@ -155,29 +184,28 @@ export class DBService {
 
   static async getCreatorsAsync(filters = {}) {
     try {
-      let query = supabase.from('profiles').select('*');
-      if (filters.query) {
-        const q = filters.query.toString().toLowerCase().trim().replace(/^@/, '');
-        if (q && q !== 'creators' && q !== 'creator') {
-          query = query.or(`username.ilike.%${q}%,display_name.ilike.%${q}%`);
-        }
-      }
-      const { data, error } = await query;
-      if (!error && data && data.length > 0) {
-        data.forEach(p => {
-          this.registerOrUpdateCreator({
-            id: p.id,
-            username: p.username || p.display_name,
-            displayName: p.display_name || p.username,
-            avatar: p.avatar_url,
-            bio: p.bio,
-            role: 'creator'
-          });
+      const cloudCreators = await fetchProfilesFromGlobalCloud();
+      if (cloudCreators && cloudCreators.length > 0) {
+        cloudCreators.forEach(c => {
+          if (c && c.username) {
+            const existingIdx = runtimeCreators.findIndex(
+              r => r.username && r.username.toLowerCase() === c.username.toLowerCase()
+            );
+            if (existingIdx >= 0) {
+              runtimeCreators[existingIdx] = { ...runtimeCreators[existingIdx], ...c };
+            } else {
+              runtimeCreators.push(c);
+            }
+          }
         });
+        try {
+          localStorage.setItem(CREATORS_STORAGE_KEY, JSON.stringify(runtimeCreators));
+        } catch (e) {}
       }
     } catch (e) {
-      console.warn("Supabase fetch creators fallback:", e);
+      console.warn("Global cloud fetch error:", e);
     }
+
     return this.getCreators(filters);
   }
 
