@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DBService } from '../services/dbService';
 import { StreamCard } from '../components/cards/StreamCard';
 import { CreatorCard } from '../components/cards/CreatorCard';
@@ -9,9 +9,25 @@ import { Search as SearchIcon, Radio, Users, Grid, Scissors } from 'lucide-react
 
 export function SearchPage({ onNavigate, onSelectStream, query: initialQuery }) {
   const [searchQuery, setSearchQuery] = useState(initialQuery || '');
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(initialQuery === 'creators' ? 'creators' : 'all');
+  const [results, setResults] = useState(() => DBService.searchAll(initialQuery || ''));
 
-  const results = DBService.searchAll(searchQuery);
+  useEffect(() => {
+    let isMounted = true;
+    // Immediate synchronous search from local memory
+    setResults(DBService.searchAll(searchQuery));
+
+    // Asynchronous cross-device fetch from Supabase
+    async function loadAsyncResults() {
+      const asyncRes = await DBService.searchAllAsync(searchQuery);
+      if (isMounted) {
+        setResults(asyncRes);
+      }
+    }
+
+    loadAsyncResults();
+    return () => { isMounted = false; };
+  }, [searchQuery]);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">

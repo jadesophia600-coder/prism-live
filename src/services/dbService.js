@@ -119,15 +119,18 @@ export class DBService {
     }
 
     try {
-      if (profile.id) {
-        supabase.from('profiles').upsert({
-          id: profile.id,
-          display_name: displayName,
-          username: username,
-          avatar_url: creatorObj.avatar,
-          bio: creatorObj.bio
-        }).then(() => {}).catch(e => console.warn("Supabase profile upsert warning:", e));
+      const supabasePayload = {
+        display_name: displayName,
+        username: username,
+        avatar_url: creatorObj.avatar,
+        bio: creatorObj.bio
+      };
+      if (profile.id && profile.id.length >= 30) {
+        supabasePayload.id = profile.id;
       }
+      supabase.from('profiles').upsert(supabasePayload)
+        .then(() => {})
+        .catch(e => console.warn("Supabase profile upsert warning:", e));
     } catch (e) {
       // Ignore offline errors
     }
@@ -152,15 +155,23 @@ export class DBService {
 
   static async getCreatorsAsync(filters = {}) {
     try {
-      const { data, error } = await supabase.from('profiles').select('*');
+      let query = supabase.from('profiles').select('*');
+      if (filters.query) {
+        const q = filters.query.toString().toLowerCase().trim().replace(/^@/, '');
+        if (q && q !== 'creators' && q !== 'creator') {
+          query = query.or(`username.ilike.%${q}%,display_name.ilike.%${q}%`);
+        }
+      }
+      const { data, error } = await query;
       if (!error && data && data.length > 0) {
         data.forEach(p => {
           this.registerOrUpdateCreator({
             id: p.id,
             username: p.username || p.display_name,
-            displayName: p.display_name,
+            displayName: p.display_name || p.username,
             avatar: p.avatar_url,
-            bio: p.bio
+            bio: p.bio,
+            role: 'creator'
           });
         });
       }
@@ -168,6 +179,12 @@ export class DBService {
       console.warn("Supabase fetch creators fallback:", e);
     }
     return this.getCreators(filters);
+  }
+
+  static async searchAllAsync(query) {
+    await this.getCreatorsAsync({ query });
+    await this.getLiveStreamsAsync({ query });
+    return this.searchAll(query);
   }
 
   static getCreatorByUsername(username) {
