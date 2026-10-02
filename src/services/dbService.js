@@ -5,6 +5,32 @@ const CREATORS_STORAGE_KEY = 'prismlive_registered_creators_v3';
 
 const DEFAULT_CREATORS = [
   {
+    id: 'cr-viccky',
+    username: 'viccky',
+    displayName: 'Viccky',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+    bio: 'Broadcaster & Live Creator on PRISM LIVE!',
+    verified: true,
+    followersCount: 5400,
+    subscribersCount: 420,
+    partnerTier: 'partner',
+    role: 'creator'
+  },
+  {
+    id: 'cr-jadesophia',
+    username: 'jadesophia',
+    displayName: 'Jade Sophia',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    bio: 'Creator & Streamer on PRISM LIVE!',
+    verified: true,
+    followersCount: 8900,
+    subscribersCount: 650,
+    partnerTier: 'partner',
+    role: 'creator'
+  },
+  {
     id: 'cr-neonvortex',
     username: 'NeonVortex',
     displayName: 'Neon Vortex',
@@ -65,7 +91,11 @@ let runtimeCreators = (() => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        // Merge DEFAULT_CREATORS to ensure viccky and jadesophia are always included
+        const map = new Map();
+        DEFAULT_CREATORS.forEach(c => map.set(c.username.toLowerCase(), c));
+        parsed.forEach(c => { if (c && c.username) map.set(c.username.toLowerCase(), c); });
+        return Array.from(map.values());
       }
     }
   } catch (e) {
@@ -74,47 +104,27 @@ let runtimeCreators = (() => {
   return DEFAULT_CREATORS;
 })();
 
-const GLOBAL_CLOUD_INDEX_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0fc4b812b609d';
+// Supabase Realtime Channel for global sync across all live browser instances
+const syncChannel = supabase.channel('prismlive_creators_sync');
 
-// Helper to push profile to global cloud database across all devices
-async function syncProfileToGlobalCloud(creatorObj) {
-  try {
-    const res = await fetch(GLOBAL_CLOUD_INDEX_URL);
-    if (res.ok) {
-      const json = await res.json();
-      let creatorsList = json.data?.creators || [];
-      const idx = creatorsList.findIndex(c => c.username?.toLowerCase() === creatorObj.username?.toLowerCase());
-      if (idx >= 0) {
-        creatorsList[idx] = { ...creatorsList[idx], ...creatorObj };
-      } else {
-        creatorsList.unshift(creatorObj);
-      }
-      await fetch(GLOBAL_CLOUD_INDEX_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'PRISM_LIVE_GLOBAL_CREATOR_INDEX_V1',
-          data: { creators: creatorsList }
-        })
-      });
+syncChannel
+  .on('broadcast', { event: 'CREATOR_REGISTERED' }, ({ payload }) => {
+    if (payload && (payload.username || payload.displayName)) {
+      DBService.registerOrUpdateCreator(payload, false);
     }
-  } catch (e) {
-    console.warn("Global cloud profile sync warning:", e);
-  }
-}
+  })
+  .subscribe();
 
-// Helper to fetch all profiles from global cloud database across all devices
-async function fetchProfilesFromGlobalCloud() {
+function broadcastCreatorProfile(creatorObj) {
   try {
-    const res = await fetch(GLOBAL_CLOUD_INDEX_URL);
-    if (res.ok) {
-      const json = await res.json();
-      return json.data?.creators || [];
-    }
+    syncChannel.send({
+      type: 'broadcast',
+      event: 'CREATOR_REGISTERED',
+      payload: creatorObj
+    });
   } catch (e) {
-    console.warn("Global cloud profile fetch warning:", e);
+    console.warn("Realtime broadcast fallback:", e);
   }
-  return [];
 }
 
 // Active user published live streams held in runtime memory if offline from Supabase
@@ -123,8 +133,8 @@ let runtimeActiveStreams = [];
 export const REAL_CATEGORIES = CATEGORIES;
 
 export class DBService {
-  // Save or update a creator profile in runtime memory, localStorage, and global cloud
-  static registerOrUpdateCreator(profile) {
+  // Save or update a creator profile in runtime memory, localStorage, and Realtime Broadcast
+  static registerOrUpdateCreator(profile, shouldBroadcast = true) {
     if (!profile || (!profile.username && !profile.displayName && !profile.email)) return null;
 
     const username = (profile.username || profile.email?.split('@')[0] || 'creator').replace(/^@/, '');
@@ -161,8 +171,9 @@ export class DBService {
       console.warn("Could not persist creator registry:", e);
     }
 
-    // Trigger real-time global cloud sync across all phones & computers
-    syncProfileToGlobalCloud(creatorObj);
+    if (shouldBroadcast) {
+      broadcastCreatorProfile(creatorObj);
+    }
 
     return creatorObj;
   }
