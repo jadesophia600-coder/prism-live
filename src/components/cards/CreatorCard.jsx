@@ -19,6 +19,9 @@ export function CreatorCard({ creator, onSelectCreator }) {
     }
   };
 
+  const followersCountNum = typeof creator.followersCount === 'number' ? creator.followersCount : 150;
+  const formattedFollowers = (followersCountNum / 1000).toFixed(1);
+
   return (
     <div
       onClick={() => onSelectCreator && onSelectCreator(creator)}
@@ -26,15 +29,19 @@ export function CreatorCard({ creator, onSelectCreator }) {
     >
       {/* Banner Backdrop */}
       <div className="absolute top-0 left-0 right-0 h-20 bg-slate-950 rounded-t-3xl overflow-hidden opacity-60">
-        <img src={creator.banner} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <img
+          src={creator.banner || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80'}
+          alt=""
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
       </div>
 
       {/* Avatar */}
       <div className="relative mt-6 mb-3">
         <img
-          src={creator.avatar}
-          alt={creator.displayName}
-          className="w-20 h-20 rounded-full object-cover ring-4 ring-slate-900 group-hover:ring-indigo-500 transition-all shadow-xl"
+          src={creator.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'}
+          alt={creator.displayName || creator.username}
+          className="w-20 h-20 rounded-full object-cover ring-4 ring-slate-900 group-hover:ring-indigo-500 transition-all shadow-xl bg-slate-900"
         />
         {creator.verified && (
           <div className="absolute bottom-0 right-0 p-1 bg-indigo-600 rounded-full text-white ring-2 ring-slate-900">
@@ -45,18 +52,18 @@ export function CreatorCard({ creator, onSelectCreator }) {
 
       {/* Details */}
       <h3 className="text-base font-extrabold text-white group-hover:text-indigo-300 transition-colors">
-        {creator.displayName}
+        {creator.displayName || creator.username}
       </h3>
       <p className="text-xs font-mono text-cyan-400 mb-2">@{creator.username}</p>
 
       <p className="text-xs text-slate-400 line-clamp-2 mb-4 px-2 leading-relaxed">
-        {creator.bio}
+        {creator.bio || 'Broadcaster on PRISM LIVE'}
       </p>
 
       {/* Followers stats */}
       <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium mb-4">
         <Users className="w-3.5 h-3.5 text-indigo-400" />
-        <span className="font-bold text-white font-mono">{creator.followersCount ? (creator.followersCount / 1000).toFixed(1) : 0}k</span> Followers
+        <span className="font-bold text-white font-mono">{formattedFollowers}k</span> Followers
       </div>
 
       {/* Follow CTA */}
@@ -74,3 +81,4 @@ export function CreatorCard({ creator, onSelectCreator }) {
     </div>
   );
 }
+

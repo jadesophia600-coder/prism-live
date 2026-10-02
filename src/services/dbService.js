@@ -1,12 +1,196 @@
 import { supabase } from "../lib/supabaseClient";
 import { CATEGORIES } from "../data/mockData";
 
+const CREATORS_STORAGE_KEY = 'prismlive_registered_creators_v3';
+
+const DEFAULT_CREATORS = [
+  {
+    id: 'cr-neonvortex',
+    username: 'NeonVortex',
+    displayName: 'Neon Vortex',
+    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+    bio: 'Pro Esports Gamer & Speedrunner. Streaming Apex, Valorant and Cyberpunk 2077 daily!',
+    verified: true,
+    followersCount: 14200,
+    subscribersCount: 1250,
+    partnerTier: 'partner',
+    role: 'creator'
+  },
+  {
+    id: 'cr-cyberalex',
+    username: 'CyberAlex',
+    displayName: 'Cyber Alex',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+    bio: 'AI & Web Developer broadcasting live full-stack React coding sessions, Rust, and LLM hacking.',
+    verified: true,
+    followersCount: 28500,
+    subscribersCount: 2890,
+    partnerTier: 'partner',
+    role: 'creator'
+  },
+  {
+    id: 'cr-djaether',
+    username: 'DJ_Aether',
+    displayName: 'DJ Aether',
+    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+    bio: 'Live Electronic Synthwave & Deep House DJ sets. Interactive chat song requests!',
+    verified: true,
+    followersCount: 19800,
+    subscribersCount: 1740,
+    partnerTier: 'ambassador',
+    role: 'creator'
+  },
+  {
+    id: 'cr-pixelqueen',
+    username: 'PixelQueen',
+    displayName: 'Pixel Queen',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    bio: 'Digital 3D Artist & Concept Art Illustrator. Live Blender & Photoshop streaming!',
+    verified: false,
+    followersCount: 8900,
+    subscribersCount: 620,
+    partnerTier: 'affiliate',
+    role: 'creator'
+  }
+];
+
+// Initialize creator registry from localStorage or default seed
+let runtimeCreators = (() => {
+  try {
+    const saved = localStorage.getItem(CREATORS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load stored creators:", e);
+  }
+  return DEFAULT_CREATORS;
+})();
+
 // Active user published live streams held in runtime memory if offline from Supabase
 let runtimeActiveStreams = [];
 
 export const REAL_CATEGORIES = CATEGORIES;
 
 export class DBService {
+  // Save or update a creator profile in runtime memory and localStorage
+  static registerOrUpdateCreator(profile) {
+    if (!profile || (!profile.username && !profile.displayName && !profile.email)) return null;
+
+    const username = (profile.username || profile.email?.split('@')[0] || 'creator').replace(/^@/, '');
+    const displayName = profile.displayName || username;
+    const id = profile.id || `cr-${username.toLowerCase()}`;
+
+    const creatorObj = {
+      id: id,
+      username: username,
+      displayName: displayName,
+      avatar: profile.avatar || profile.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+      banner: profile.banner || profile.banner_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+      bio: profile.bio || (profile.role === 'creator' ? "Broadcasting live on PRISM LIVE!" : "PRISM LIVE member & stream enthusiast!"),
+      verified: profile.isVerified || profile.verified || false,
+      followersCount: profile.followersCount || 150,
+      subscribersCount: profile.subscribersCount || 12,
+      partnerTier: profile.partnerTier || 'affiliate',
+      role: profile.role || 'creator'
+    };
+
+    const existingIdx = runtimeCreators.findIndex(
+      c => (c.id && c.id === creatorObj.id) || (c.username && c.username.toLowerCase() === creatorObj.username.toLowerCase())
+    );
+
+    if (existingIdx >= 0) {
+      runtimeCreators[existingIdx] = { ...runtimeCreators[existingIdx], ...creatorObj };
+    } else {
+      runtimeCreators = [creatorObj, ...runtimeCreators];
+    }
+
+    try {
+      localStorage.setItem(CREATORS_STORAGE_KEY, JSON.stringify(runtimeCreators));
+    } catch (e) {
+      console.warn("Could not persist creator registry:", e);
+    }
+
+    try {
+      if (profile.id) {
+        supabase.from('profiles').upsert({
+          id: profile.id,
+          display_name: displayName,
+          username: username,
+          avatar_url: creatorObj.avatar,
+          bio: creatorObj.bio
+        }).then(() => {}).catch(e => console.warn("Supabase profile upsert warning:", e));
+      }
+    } catch (e) {
+      // Ignore offline errors
+    }
+
+    return creatorObj;
+  }
+
+  static getCreators(filters = {}) {
+    let creators = [...runtimeCreators];
+    if (filters.query) {
+      const q = filters.query.toString().toLowerCase().trim().replace(/^@/, '');
+      if (q && q !== 'creators' && q !== 'creator') {
+        creators = creators.filter(c =>
+          (c.username && c.username.toLowerCase().includes(q)) ||
+          (c.displayName && c.displayName.toLowerCase().includes(q)) ||
+          (c.bio && c.bio.toLowerCase().includes(q))
+        );
+      }
+    }
+    return creators;
+  }
+
+  static async getCreatorsAsync(filters = {}) {
+    try {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (!error && data && data.length > 0) {
+        data.forEach(p => {
+          this.registerOrUpdateCreator({
+            id: p.id,
+            username: p.username || p.display_name,
+            displayName: p.display_name,
+            avatar: p.avatar_url,
+            bio: p.bio
+          });
+        });
+      }
+    } catch (e) {
+      console.warn("Supabase fetch creators fallback:", e);
+    }
+    return this.getCreators(filters);
+  }
+
+  static getCreatorByUsername(username) {
+    if (!username) return runtimeCreators[0] || DEFAULT_CREATORS[0];
+    const target = username.toString().toLowerCase().replace(/^@/, '');
+    const found = runtimeCreators.find(c => c.username && c.username.toLowerCase() === target);
+    if (found) return found;
+
+    return {
+      id: `cr-${target}`,
+      username: target,
+      displayName: target.charAt(0).toUpperCase() + target.slice(1),
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+      banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+      bio: 'Creator on PRISM LIVE broadcasting live content.',
+      verified: false,
+      followersCount: 150,
+      subscribersCount: 15,
+      partnerTier: 'affiliate',
+      role: 'creator'
+    };
+  }
+
   // Fetch live streams from Supabase
   static async getLiveStreamsAsync(filters = {}) {
     try {
@@ -50,7 +234,7 @@ export class DBService {
         avatar: s.profiles?.avatar_url || s.creator?.avatar || "",
         bio: s.profiles?.bio || "Creator on PRISM LIVE",
         verified: false,
-        followersCount: 0
+        followersCount: 150
       },
       category: {
         id: s.categories?.id || "cat-1",
@@ -147,17 +331,32 @@ export class DBService {
   }
 
   static searchAll(query) {
-    if (!query) return { streams: [], creators: [], categories: [], clips: [] };
+    if (!query) return { streams: runtimeActiveStreams, creators: runtimeCreators, categories: CATEGORIES, clips: [] };
 
-    const q = query.toString().toLowerCase();
+    const q = query.toString().toLowerCase().trim().replace(/^@/, '');
+    const isCreatorsKeyword = q === 'creators' || q === 'creator' || q === 'broadcaster' || q === 'broadcasters';
+
     const streams = runtimeActiveStreams.filter(s =>
       (s.title && s.title.toLowerCase().includes(q)) ||
-      (s.category && s.category.name && s.category.name.toLowerCase().includes(q))
-    );
-    const categories = CATEGORIES.filter(cat =>
-      (cat.name && cat.name.toLowerCase().includes(q))
+      (s.category && s.category.name && s.category.name.toLowerCase().includes(q)) ||
+      (s.creator && (s.creator.displayName?.toLowerCase().includes(q) || s.creator.username?.toLowerCase().includes(q)))
     );
 
-    return { streams, creators: [], categories, clips: [] };
+    const creators = isCreatorsKeyword
+      ? runtimeCreators
+      : runtimeCreators.filter(c =>
+          (c.username && c.username.toLowerCase().includes(q)) ||
+          (c.displayName && c.displayName.toLowerCase().includes(q)) ||
+          (c.bio && c.bio.toLowerCase().includes(q))
+        );
+
+    const categories = CATEGORIES.filter(cat =>
+      (cat.name && cat.name.toLowerCase().includes(q)) ||
+      (cat.slug && cat.slug.toLowerCase().includes(q)) ||
+      (cat.description && cat.description.toLowerCase().includes(q))
+    );
+
+    return { streams, creators, categories, clips: [] };
   }
 }
+

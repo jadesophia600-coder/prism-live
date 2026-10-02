@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { DBService } from '../services/dbService';
 
 const AuthContext = createContext();
 
@@ -44,11 +45,13 @@ export function AuthProvider({ children }) {
 
   const [notifications, setNotifications] = useState([]);
 
-  // Persist user session to localStorage
+  // Persist user session to localStorage & register creator in DBService
   useEffect(() => {
     try {
-      if (user && user.onboardingCompleted) {
+      if (user && user.onboardingCompleted && (user.username || user.displayName || user.email)) {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+        // Register or update profile in DBService searchable creator registry
+        DBService.registerOrUpdateCreator(user);
       } else {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       }
